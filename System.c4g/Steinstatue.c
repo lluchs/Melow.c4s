@@ -6,7 +6,7 @@
 
 protected func Initialize() {
 	if(GetID() == IDOL)
-		AddEffect("Extinguish", this, 100, 10, this, GetID());
+		AddEffect("Extinguish", this, 100, 20, this, GetID());
 	return _inherited(...);
 }
 
@@ -16,7 +16,7 @@ public func FxExtinguishStart(object pTarget, int iEffectNumber, int iTemp) {
 	}
 }
 public func FxExtinguishTimer(object pTarget, int iEffectNumber) {
-	var pObj = FindObject2(Find_Distance(GetObjHeight() * 3), Find_OCF(OCF_OnFire), Find_OCF(OCF_CrewMember));
+	var pObj = FindObject2(Find_Distance(GetObjHeight() * 3), Find_OCF(OCF_OnFire), Find_OCF(OCF_CrewMember), Find_Not(Find_Func("InLava")));
 	if(pObj) {
 		pTarget -> Sound("Splash1");
 		// Lösche es
@@ -28,6 +28,10 @@ public func FxExtinguishTimer(object pTarget, int iEffectNumber) {
 		AddEffect("Reload", pTarget, 100, 2, pTarget, pTarget -> GetID());
 		return -1;
 	}
+}
+
+global func InLava() {
+	return WildcardMatch(MaterialName(GetMaterial()), "*Lava*");
 }
 
 public func FxReloadTimer(object pTarget, int iEffectNumber) {
