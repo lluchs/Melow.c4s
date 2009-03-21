@@ -167,7 +167,7 @@ public func StuckCheck(object pClonk) {
 }
 
 private func PlaceLorry() {
-	return PlaceVegetation(LORY, LandscapeWidth() / 4, RandomX(LandscapeHeight() / 4, LandscapeHeight() - (2 * LandscapeHeight() / 4)), LandscapeWidth() / 2, LandscapeHeight() / 3, 100000);
+	return PlaceVegetation(LORY, LandscapeWidth() / 4, RandomX(LandscapeHeight() / 3, LandscapeHeight() - (LandscapeHeight() / 3)), LandscapeWidth() / 2, LandscapeHeight() / 4, 100000);
 }
 
 protected func RemovePlayer(int iPlr, int iTeam) {
