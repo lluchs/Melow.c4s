@@ -235,7 +235,7 @@ global func FxAntiDamage() {
 	return;
 }
 
-protected func FxAntiEffect(string szNewEffect) {
+global func FxAntiEffect(string szNewEffect) {
 	// Feuer abblocken
 	if(WildcardMatch(szNewEffect, "*Fire*"))
 		return -1;
