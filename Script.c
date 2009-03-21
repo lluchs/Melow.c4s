@@ -6,19 +6,6 @@
 
 protected func Initialize()
   {
-  /*var sx=LandscapeWidth()/2, sy;
-  while (!GBackSolid(sx, sy)) ++sy;
-  CreateConstruction(_STA, sx,sy, -1, 100, true, false);
-  // Anfangslore mit endlos Material
-  var lorry = PlaceVehicle(LORY,50,LandscapeHeight()-40);
-  // Lebensmittelversorgung für den Aufstieg
-  EnsureFilling(lorry);
-  EnsureContCnt(BRED, 6, lorry);
-  EnsureContCnt(CBRD, 3, lorry);*/
-  // Nacht
-  //ObjectCall(FindObject(TIME), "SetTime", 50);
-  // Startnachricht
-  //Message("$MsgGo$");
   // Leuchten von all der Lava
   SetGamma(0, RGB(160,110,90), RGB(255,255,255));
   // Fahrzeuge in die Höhle
@@ -33,10 +20,6 @@ protected func Initialize()
   	else
   		CreateObject(ID, iX, iY, NO_OWNER);
   }
-  // Spielziel einrichten
-  /*var goal = CreateObject(SCRG,50,50,-1);
-  goal->SetMessages("$MsgGoalFulfilled$", "$MsgGoalUnfulfilled$");
-  goal->SetMissionAccess("TheAbyss");*/
   // Statuenteile erzeugen
   CreateStatuePart(_PA1); CreateStatuePart(_PA2); CreateStatuePart(_PA3);
   CreateStatuePart(_PA4); CreateStatuePart(_PA5); CreateStatuePart(_PA6);
@@ -44,9 +27,7 @@ protected func Initialize()
   aPlayers = [[], []];
   aLorrys = CreateArray(2);
   aRelaunches = CreateArray(2);
-  //aBalance = CreateArray(2);
   aMarkable = CreateArray(2);
-  //aDeathClonks = [[], []];
   // Fertig
   return 1;
   }
@@ -145,42 +126,15 @@ global func RndStatContID()
 
 /* Spielerinitialisierung */
 
-/*protected func InitializePlayer(int iPlr)
-  {
-  if (FrameCounter()>370) return(PlrMessage("$MsgNoRuntimeJoin$", iPlr), EliminatePlayer(iPlr));
-  return(JoinPlayer(iPlr));
-  }
-
-private func JoinPlayer(int iPlr)
-  {
-  // Start mit voller Energie
-  var obj=GetCrew(Par());
-  DoEnergy(100000,obj);
-  // Start in der Höhle und mit Lehm
-  SetPosition(10+Random(100), LandscapeHeight()-40, obj);
-  CreateContents(LOAM,obj);
-  return(1);
-  }*/
-static aPlayers, aLorrys, aRelaunches, aMarkable;//, aBalance;//, aDeathClonks;
+static aPlayers, aLorrys, aRelaunches, aMarkable;
 protected func InitializePlayer(int iPlr) {
 	var iTeam = GetPlayerTeam(iPlr);
 	iTeam--;
 	PushBack(iPlr, aPlayers[iTeam]);
 	if(GetLength(aPlayers[iTeam]) == 1) {
-		// Anfangslore mit endlos Material
-		//var pWipf = PlaceAnimal(WIPF);
-		//var pWipf = PlaceWipf();
-		/*while(pWipf -> Stuck()) {
-			pWipf -> RemoveObject();
-			pWipf = PlaceWipf(); // Lebenslustige Höhlenbewohner verschönern den Start!
-		}*/
-		//var iX = pWipf -> GetX(), iY = pWipf -> GetY();
-		/*while(GBackSolid(iX, iY) || GBackLiquid(iX, iY))
-			iY++;*/
-  	//var pLorry = CreateObject(LORY, iX, iY, NO_OWNER);
   	var pLorry = PlaceLorry();
   	if(OtherLorry(iTeam + 1)) {
-  		for(var i = 0; /*!pLorry ||*/ (pLorry -> ObjectDistance(OtherLorry(iTeam + 1)) < 200); i++) {
+  		for(var i = 0; (pLorry -> ObjectDistance(OtherLorry(iTeam + 1)) < 200); i++) {
   			if(pLorry)
   				pLorry -> RemoveObject();
   			pLorry = PlaceLorry();
@@ -213,11 +167,6 @@ public func StuckCheck(object pClonk) {
 private func PlaceLorry() {
 	return PlaceVegetation(LORY, LandscapeWidth() / 4, RandomX(LandscapeHeight() / 4, LandscapeHeight() - (2 * LandscapeHeight() / 4)), LandscapeWidth() / 2, LandscapeHeight() / 3, 100000);
 }
-
-/*private func PlaceWipf() {
-	PlaceObjects(WIPF, 1, "Tunnel", LandscapeWidth() / 4, LandscapeHeight() / 4, LandscapeWidth() / 2, LandscapeHeight() / 2, false, true);
-	return FindObject2(Find_ID(WIPF));
-}*/
 
 protected func RemovePlayer(int iPlr, int iTeam) {
 	// Spiel vorbei? -> egal
@@ -256,30 +205,20 @@ protected func RemovePlayer(int iPlr, int iTeam) {
 
 static fGameOver;
 protected func OnClonkDeath(object pClonk) {
-	var /*fRelaunchBalance = RelaunchBalance(pClonk -> GetOwner()),*/ pStatuePart = FindObject2(Find_Func("IsHolyStatuePart"), Find_Func("IsMarkedFor", GetPlayerTeam(pClonk -> GetOwner())), Sort_Random());
-	if(/*!fRelaunchBalance &&*/ !pStatuePart && EliminationCheck(GetPlayerTeam(pClonk -> GetOwner())))
+	var pStatuePart = FindObject2(Find_Func("IsHolyStatuePart"), Find_Func("IsMarkedFor", GetPlayerTeam(pClonk -> GetOwner())), Sort_Random());
+	if(!pStatuePart && EliminationCheck(GetPlayerTeam(pClonk -> GetOwner())))
 		return;
 	var pNewClonk = CreateObject(CLNK, 0, 0, pClonk -> GetOwner());
 	pNewClonk -> GrabObjectInfo(pClonk);
 	pNewClonk -> DoEnergy(100);
 	if(pStatuePart) {
 		pStatuePart -> RejoinClonk(0, -1, pNewClonk);
-		//Log("<c %x>Spieler %s startet automatisch an einem markierten Statuenteil neu!</c>", GetTeamColor(GetPlayerTeam(pClonk -> GetOwner())), GetPlayerName(pClonk -> GetOwner()));
 		return 1;
 	}
-	/*if(fRelaunchBalance) {
-		var pLorry = aLorrys[GetPlayerTeam(pClonk -> GetOwner()) - 1];
-		pNewClonk -> SetPosition(pLorry -> GetX(), pLorry -> GetY());
-		SetCursor(pNewClonk -> GetOwner(), pNewClonk, true);
-		AddEffect("BanBurnPotion", pNewClonk, 210, 1, 0, PFIR, PFIR -> EffectDuration());
-		aRelaunches[GetPlayerTeam(pClonk -> GetOwner()) - 1]++;
-		return 1;
-	}*/
 	AddEffect("Anti", pNewClonk, 300, 10);
 	pNewClonk -> Enter(CreateObject(TIM1, pClonk -> GetX(), pClonk -> GetY(), NO_OWNER));
 	Log("<c %x>Spieler %s wartet auf einen Relaunch (Statuenteil anfassen + Doppelgraben)!</c>", GetTeamColor(GetPlayerTeam(pClonk -> GetOwner())), GetPlayerName(pClonk -> GetOwner()));
 	SetCursor(pClonk -> GetOwner(), pClonk, 1, 1);
-	//PushBack(pNewClonk, aDeathClonks[GetPlayerTeam(pClonk -> GetOwner()) - 1]);
 }
 
 private func EliminationCheck(int iTeam) {
@@ -289,14 +228,6 @@ private func EliminationCheck(int iTeam) {
 		return 1;
 	}
 }
-
-/*private func RelaunchBalance(int iPlr) {
-	var iTeam = GetPlayerTeam(iPlr), iOtherTeam = OtherTeam(iTeam), iTeamPlayerCount = GetLength(GetPlayerByTeam(iTeam)), iOtherTeamPlayerCount = GetLength(GetPlayerByTeam(iOtherTeam)), iDiff = iOtherTeamPlayerCount - iTeamPlayerCount + aBalance[iTeam - 1] - aBalance[iOtherTeam - 1];
-	// Differenz größer als 0 (-> weniger Spieler in diesem Team) UND bisherige Relaunches kleiner als die Differenz UND keine lebenden Clonks mehr im Team?
-	if((iDiff > 0) && (aRelaunches[iTeam - 1] < iDiff) && (!ObjectCount2(Find_OCF(OCF_CrewMember), Find_Team(iTeam), Find_Not(Find_Func("Waits4Relaunch"))))) {
-		return 1;
-	}
-}*/
 
 global func FxAntiDamage() {
 	return;
@@ -371,22 +302,3 @@ global func FxIntLorryFillTimer(object pTarget, int iEffectNumber) {
 	var cnt; while(++cnt<Random(50)) pTarget -> CreateContents(RndCntID());
 	Sparkle(5, pTarget -> GetX(), pTarget -> GetY());
 }
-
-/*public func EnsureFilling(object pOfObj)
-  {
-  if (!pOfObj) return();
-  EnsureContCnt(LOAM,5,pOfObj);
-  EnsureContCnt(METL,5,pOfObj);
-  EnsureContCnt(FLNT,5,pOfObj);
-  //EnsureContCnt(CBRD,1,pOfObj);
-  //EnsureContCnt(BRED,1,pOfObj);
-  if (!Random(20)) EnsureContCnt(CNKT,1,pOfObj);
-  return(1);
-  }
-
-private func EnsureContCnt(id idType, int iCount, object pInObj)
-  {
-  var i=iCount-ContentsCount(idType,pInObj);
-  while (i-- > 0) { CreateContents(idType,pInObj); Sparkle(5, GetX(pInObj), GetY(pInObj)); }
-  return(1);
-  }*/
