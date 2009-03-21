@@ -20,6 +20,24 @@ protected func Initialize()
   	else
   		CreateObject(ID, iX, iY, NO_OWNER);
   }
+  // Landschaft spiegeln
+  var iX = 0, iY = 0;
+  for(var x=0; x < LandscapeWidth() / 2; x++)
+   for(var y=0; y < LandscapeHeight(); y++)
+   	if(GetMaterial(x+iX, y+iY) && GetTexture(x+iX, y+iY))
+     DrawMaterialQuad (Format("%s-%s", MaterialName(GetMaterial(x+iX, y+iY)), GetTexture(x+iX, y+iY)), LandscapeWidth()-x-iX, y+iY, LandscapeWidth()-x-iX, y+iY+1, LandscapeWidth()-x-iX+1, y+iY+1, LandscapeWidth()-x-iX+1, y+iY, !GBackSky(x+iX, y+iY));
+	// alle Objekte auf der rechten Seite entfernen
+	for(var pObj in FindObjects(Find_InRect(LandscapeWidth() / 2, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree"))))
+		pObj -> RemoveObject();
+	// und durch die linken Objekte ersetzen
+	for(var pObj in FindObjects(Find_NoContainer(), Find_InRect(0, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree"))))
+		CreateObject(pObj -> GetID(), LandscapeWidth() - pObj -> GetX(), pObj -> GetY() - GetDefCoreVal("Offset", "DefCore", pObj -> GetID(), 1), pObj -> GetOwner());
+  var pNewObj, pContainer;
+  for(var pObj in FindObjects(Find_AnyContainer(), Find_InRect(0, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree")))) {
+		pNewObj = CreateObject(pObj -> GetID(), LandscapeWidth() - pObj -> GetX(), pObj -> GetY() - GetDefCoreVal("Offset", "DefCore", pObj -> GetID(), 1), pObj -> GetOwner());
+  	pContainer = pObj -> Contained();
+  	pNewObj -> Enter(FindObject2(Find_ID(pContainer -> GetID()), Find_AtPoint(LandscapeWidth() - pContainer -> GetX(), pContainer -> GetY())));
+  }
   // Statuenteile erzeugen
   for(var i=0; i<2; i++) {
   	CreateStatuePart(_PA1); CreateStatuePart(_PA2); CreateStatuePart(_PA3);
