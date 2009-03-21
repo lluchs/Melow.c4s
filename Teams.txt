@@ -1,0 +1,14 @@
+[Teams]
+AllowHostilityChange=0
+AllowTeamSwitch=0
+TeamColors=1
+
+	[Team]
+	id=1
+	Name=Team 1
+	PlrStartIndex=1
+
+	[Team]
+	id=2
+	Name=Team 2
+	PlrStartIndex=2
