@@ -152,7 +152,16 @@ protected func InitializePlayer(int iPlr) {
 	iTeam--;
 	PushBack(iPlr, aPlayers[iTeam]);
 	if(GetLength(aPlayers[iTeam]) == 1) {
-  	var pLorry = PlaceLorry(iTeam + 1);
+  	var pOtherLorry = OtherLorry(iTeam + 1);
+  	if(pOtherLorry) {
+  		if(pOtherLorry -> GetX() < LandscapeWidth() / 2) {
+  			var pLorry = CreateObject(LORY, LandscapeWidth() - pOtherLorry -> GetX(), pOtherLorry -> GetY() - GetDefCoreVal("Offset", "DefCore", LORY, 1), NO_OWNER);
+  		}
+  		else
+  			var pLorry = CreateObject(LORY, Abs(pOtherLorry -> GetX() - LandscapeWidth()), pOtherLorry -> GetY() - GetDefCoreVal("Offset", "DefCore", LORY, 1), NO_OWNER);
+  	}
+  	else
+  		var pLorry = PlaceLorry();
   	if(!pLorry)
   		return;
   	var iX = pLorry -> GetX(), iY = pLorry -> GetY();
