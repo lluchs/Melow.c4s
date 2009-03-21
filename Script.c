@@ -207,6 +207,8 @@ protected func RemovePlayer(int iPlr, int iTeam) {
 
 static fGameOver;
 protected func OnClonkDeath(object pClonk) {
+	if(fGameOver)
+		return;
 	var pStatuePart = FindObject2(Find_Func("IsHolyStatuePart"), Find_Func("IsMarkedFor", GetPlayerTeam(pClonk -> GetOwner())), Sort_Random());
 	if(!pStatuePart && EliminationCheck(GetPlayerTeam(pClonk -> GetOwner())))
 		return;
