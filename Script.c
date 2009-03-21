@@ -21,8 +21,10 @@ protected func Initialize()
   		CreateObject(ID, iX, iY, NO_OWNER);
   }
   // Statuenteile erzeugen
-  CreateStatuePart(_PA1); CreateStatuePart(_PA2); CreateStatuePart(_PA3);
-  CreateStatuePart(_PA4); CreateStatuePart(_PA5); CreateStatuePart(_PA6);
+  for(var i=0; i<2; i++) {
+  	CreateStatuePart(_PA1); CreateStatuePart(_PA2); CreateStatuePart(_PA3);
+  	CreateStatuePart(_PA4); CreateStatuePart(_PA5); CreateStatuePart(_PA6);
+  }
   
   aPlayers = [[], []];
   aLorrys = CreateArray(2);
