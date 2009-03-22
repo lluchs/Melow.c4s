@@ -183,7 +183,7 @@ static iPlaceLorryY;
 private func PlaceLorry(int iTeam) {
 	if(!iPlaceLorryY)
 		iPlaceLorryY = RandomX(LandscapeHeight() / 5, LandscapeHeight() - (LandscapeHeight() / 3));
-	var iX = LandscapeWidth() / 4, iY = iPlaceLorryY, iWdt = LandscapeWidth() / 2, iHgt = LandscapeHeight() / 4;
+	var iX = LandscapeWidth() / 6, iY = iPlaceLorryY, iWdt = LandscapeWidth() / 2 - LandscapeWidth() / 4, iHgt = LandscapeHeight() / 4;
 	var iRX, iRY, pLorry;
 	for(var i = 0; i < 50000; i++) {
 		iRX = RandomX(iX, iX + iWdt);
