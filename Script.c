@@ -144,7 +144,7 @@ protected func InitializePlayer(int iPlr) {
   				break;
   		}
   	}
-  	pLorry -> SetPosition(pLorry -> GetX(), pLorry -> GetY() - 5);
+  	pLorry -> SetPosition(pLorry -> GetX(), pLorry -> GetY() - 6);
   	var iX = pLorry -> GetX(), iY = pLorry -> GetY();
   	CreateObject(WIPF, iX, iY, NO_OWNER) -> SetClrModulation(GetTeamColor(iTeam + 1));
   	pLorry -> SetTeam(iTeam + 1);
@@ -166,8 +166,11 @@ public func StuckCheck(object pClonk) {
   		pClonk -> CreateContents(TFLN);
 }
 
+static iPlaceLorryY;
 private func PlaceLorry() {
-	return PlaceVegetation(LORY, LandscapeWidth() / 4, RandomX(LandscapeHeight() / 3, LandscapeHeight() - (LandscapeHeight() / 3)), LandscapeWidth() / 2, LandscapeHeight() / 4, 100000);
+	if(!iPlaceLorryY)
+		iPlaceLorryY = RandomX(LandscapeHeight() / 3, LandscapeHeight() - (LandscapeHeight() / 3));
+	return PlaceVegetation(LORY, LandscapeWidth() / 4, iPlaceLorryY, LandscapeWidth() / 2, LandscapeHeight() / 4, 100000);
 }
 
 protected func RemovePlayer(int iPlr, int iTeam) {
