@@ -21,12 +21,14 @@ protected func Initialize()
   		CreateObject(ID, iX, iY, NO_OWNER);
   }
   // Landschaft spiegeln
+  Log("Landschaft wird gespiegelt, bitte warten...");
   var iX = 0, iY = 0;
   for(var x=0; x < LandscapeWidth() / 2; x++)
    for(var y=0; y < LandscapeHeight(); y++)
    	if(GetMaterial(x+iX, y+iY) && GetTexture(x+iX, y+iY))
      DrawMaterialQuad (Format("%s-%s", MaterialName(GetMaterial(x+iX, y+iY)), GetTexture(x+iX, y+iY)), LandscapeWidth()-x-iX, y+iY, LandscapeWidth()-x-iX, y+iY+1, LandscapeWidth()-x-iX+1, y+iY+1, LandscapeWidth()-x-iX+1, y+iY, !GBackSky(x+iX, y+iY));
 	// alle Objekte auf der rechten Seite entfernen
+	Log("Objekte werden gespiegelt...");
 	for(var pObj in FindObjects(Find_InRect(LandscapeWidth() / 2, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree"))))
 		pObj -> RemoveObject();
 	// und durch die linken Objekte ersetzen
