@@ -2,6 +2,7 @@
 AllowHostilityChange=0
 AllowTeamSwitch=0
 TeamColors=1
+TeamDistribution=RandomInv
 
 	[Team]
 	id=1
