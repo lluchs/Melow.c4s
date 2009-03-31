@@ -30,6 +30,7 @@ protected func FxIntRelauncherTimer(object pTarget, int iEffectNumber) {
 		pObj -> RemoveObject();
 	}
 	pClonk -> SetPosition(GetX(), GetY());
+	SetViewCursor(pClonk -> GetOwner(), pClonk);
 	SetCursor(pClonk -> GetOwner(), pClonk, true);
 	pClonk -> DoEnergy(100);
 	pClonk -> Extinguish();

@@ -26,6 +26,7 @@ public func RejoinClonk(int iTeam, int iPlr, object pClonk) {
 		pObj -> RemoveObject();
 	}
 	pClonk -> SetPosition(GetX(), GetY());
+	SetViewCursor(pClonk -> GetOwner(), pClonk);
 	SetCursor(pClonk -> GetOwner(), pClonk, true);
 	pClonk -> DoEnergy(100);
 	pClonk -> Extinguish();

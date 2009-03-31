@@ -190,6 +190,7 @@ protected func RemovePlayer(int iPlr, int iTeam) {
 		var pObj = pWaitingClonk -> Contained();
 		pWaitingClonk -> Exit();
 		pWaitingClonk -> SetPosition(pClonk -> GetX(), pClonk -> GetY());
+		SetViewCursor(pWaitingClonk -> GetOwner(), pWaitingClonk);
 		SetCursor(pWaitingClonk -> GetOwner(), pWaitingClonk, true);
 		pWaitingClonk -> DoEnergy(100);
 		pWaitingClonk -> Extinguish();
