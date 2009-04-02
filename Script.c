@@ -134,25 +134,11 @@ protected func InitializePlayer(int iPlr) {
 	iTeam--;
 	PushBack(iPlr, aPlayers[iTeam]);
 	if(GetLength(aPlayers[iTeam]) == 1) {
-  	var pLorry = PlaceLorry();
-  	if(OtherLorry(iTeam + 1)) {
-  		for(var i = 0; (pLorry -> ObjectDistance(OtherLorry(iTeam + 1)) < 200); i++) {
-  			if(pLorry)
-  				pLorry -> RemoveObject();
-  			pLorry = PlaceLorry();
-  			if(i > 50)
-  				break;
-  		}
-  	}
-  	pLorry -> SetPosition(pLorry -> GetX(), pLorry -> GetY() - 6);
+  	var pLorry = PlaceLorry(iTeam + 1);
+  	if(!pLorry)
+  		return;
   	var iX = pLorry -> GetX(), iY = pLorry -> GetY();
   	CreateObject(WIPF, iX, iY, NO_OWNER) -> SetClrModulation(GetTeamColor(iTeam + 1));
-  	pLorry -> SetTeam(iTeam + 1);
-  	aLorrys[iTeam] = pLorry;
-  	// Objektversorgung
-  	AddEffect("IntTeamLorryFill", pLorry, 100, 5000, 0, 0, iTeam);
-  	if(pLorry -> Stuck())
-  		ShakeFree(iX, iY, GetDefWidth(pLorry -> GetID()));
   	ScheduleGameCall("StuckCheck", 30, 0, GetCrew(iPlr));
 	}
 	else
@@ -167,10 +153,38 @@ public func StuckCheck(object pClonk) {
 }
 
 static iPlaceLorryY;
-private func PlaceLorry() {
+private func PlaceLorry(int iTeam) {
 	if(!iPlaceLorryY)
-		iPlaceLorryY = RandomX(LandscapeHeight() / 3, LandscapeHeight() - (LandscapeHeight() / 3));
-	return PlaceVegetation(LORY, LandscapeWidth() / 4, iPlaceLorryY, LandscapeWidth() / 2, LandscapeHeight() / 4, 100000);
+		iPlaceLorryY = RandomX(LandscapeHeight() / 5, LandscapeHeight() - (LandscapeHeight() / 3));
+	var iX = LandscapeWidth() / 4, iY = iPlaceLorryY, iWdt = LandscapeWidth() / 2, iHgt = LandscapeHeight() / 4;
+	var iRX, iRY, pLorry;
+	for(var i = 0; i < 50000; i++) {
+		iRX = RandomX(iX, iX + iWdt);
+		iRY = RandomX(iY, iY + iHgt);
+		if(GetMaterial(iRX, iRY) != Material("Tunnel"))
+			continue;
+		while(GetMaterial(iRX, iRY) == Material("Tunnel")) {
+			iRY += 2;
+		}
+		iRY -= 5;
+		if(OtherLorry(iTeam) && Distance(iRX, iRY, OtherLorry(iTeam) -> GetX(), OtherLorry(iTeam) -> GetY()) < 200)
+			continue;
+		pLorry = CreateObject(LORY, iRX, iRY, NO_OWNER);
+		pLorry -> SetTeam(iTeam);
+  	aLorrys[iTeam - 1] = pLorry;
+  	// Objektversorgung
+  	AddEffect("IntTeamLorryFill", pLorry, 100, 5000, 0, 0, iTeam);
+  	if(pLorry -> Stuck())
+  		ShakeFree(pLorry -> GetX(), pLorry -> GetY(), GetDefWidth(pLorry -> GetID()));
+  	if(pLorry -> Stuck())
+  		CreateObject(ROCK, pLorry -> GetX(), pLorry -> GetY(), NO_OWNER) -> Explode(GetDefWidth(pLorry -> GetID()));
+  	break;
+	}
+	if(!pLorry) {
+		Log("ERROR: Keine passende Lorenfunktion gefunden (und das nach 50000 versuchen :/)");
+		GameOver(); // besser neue Karte erstellen - sollte aber eigentlich eh nicht soweit kommen
+	}
+	return pLorry;
 }
 
 protected func RemovePlayer(int iPlr, int iTeam) {
