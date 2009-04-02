@@ -11,7 +11,7 @@ protected func Initialize()
   // Fahrzeuge in die Höhle
   var cnt=Random(5); while (++cnt<8) PlaceVehicle();
   var iX, iY, ID;
-  for(var i = 0; i < RandomX(5, 20); i++) {
+  for(var i = 0; i < RandomX(5, 10); i++) {
   	ID = IDOL;
   	if(!Random(3))
   		ID = GIDL;
