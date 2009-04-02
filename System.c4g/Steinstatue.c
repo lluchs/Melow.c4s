@@ -5,8 +5,12 @@
 #appendto IDOL
 
 protected func Initialize() {
-	if(GetID() == IDOL)
-		AddEffect("Extinguish", this, 100, 20, this, GetID());
+	if(GetID() == IDOL) {
+		if(!FrameCounter())
+			AddEffect("Extinguish", this, 100, 20, this, GetID());
+		else
+			AddEffect("Reload", this, 100, 2, this, GetID());
+	}
 	return _inherited(...);
 }
 
