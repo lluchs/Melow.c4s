@@ -9,7 +9,7 @@ protected func Initialize()
   // Leuchten von all der Lava
   SetGamma(0, RGB(160,110,90), RGB(255,255,255));
   // Fahrzeuge in die Höhle
-  var cnt=Random(5); while (++cnt<8) PlaceVehicle();
+  var cnt=Random(5); while (++cnt<13) PlaceVehicle();
   var iX, iY, ID;
   for(var i = 0; i < RandomX(5, 10); i++) {
   	ID = IDOL;
@@ -93,12 +93,12 @@ global func FindVehPos(&x, &y)
 private func RndVehID()
   {
   var num;
-  if (!(num=Random(6))) return(LORY);
+  if (!(num=Random(8))) return(HUT1);
   if (!--num)           return(CATA);
   if (!--num)           return(CANN);
   if (!--num)           return(WAGN);
   if (!--num)           return(XBOW);
-                        return(HUT1);
+                        return(LORY);
   }
 
 // Zufälliges Materialteil
