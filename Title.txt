@@ -1,2 +1,2 @@
-DE:In der Tiefe (Melee)
-US:Deep Down (Melee)
+DE:In der Tiefe (Melee) (Spiegelung)
+US:Deep Down (Melee) (Reflection)
