@@ -18,22 +18,30 @@ public func SetTeam(int iNew) {
 // Steuerung
 
 protected func ControlDig(object pClonk) {
-	if(Check(pClonk))
-		return 1;
   // Herausnehmen per Graben: Holen-Menü öffnen
   pClonk -> SetCommand(0, "Get", this, 0,0, 0, 1);
 }
 
-protected func ControlThrow(object pClonk) {
-	if(Check(pClonk))
-		return 1;
-}
+private func MaxContents() { return 100; }
 
-private func Check(object pClonk) {
+/* Anti-Rausnehmen */
+
+protected func Grabbed(object pClonk, bool fGrab) {
 	if(iTeam && GetPlayerTeam(pClonk -> GetOwner()) != iTeam) {
-		CreateObject(TIM1) -> Explode(RandomX(20, 30));
-		return 1;
+		if(fGrab)
+			AddEffect("IntGetCheck", pClonk, 100, 1, this, GetID());
+		else
+			RemoveEffect("IntGetCheck", pClonk);
 	}
 }
 
-private func MaxContents() { return 100; }
+protected func FxIntGetCheckTimer(object pTarget, int iEffectNumber) {
+	if(pTarget -> GetAction() != "Push" || pTarget -> GetActionTarget() != this)
+		return -1;
+	var idMenu = pTarget -> GetMenu();
+	if(idMenu == 0013 || idMenu == 0018) {
+		CreateObject(TIM1) -> Explode(RandomX(20, 30));
+		pTarget -> CloseMenu();
+		return -1;
+	}
+}
