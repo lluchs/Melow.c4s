@@ -8,6 +8,16 @@ protected func Initialize()
   {
   // Leuchten von all der Lava
   SetGamma(0, RGB(160,110,90), RGB(255,255,255));
+  
+  aPlayers = [[], []];
+  aLorrys = CreateArray(2);
+  aRelaunches = CreateArray(2);
+  aMarkable = CreateArray(2);
+  // Fertig
+  return 1;
+  }
+  
+public func Initialize2() {
   // Fahrzeuge in die Höhle
   var cnt=Random(5); while (++cnt<13) PlaceVehicle();
   var iX, iY, ID;
@@ -25,14 +35,7 @@ protected func Initialize()
   	CreateStatuePart(_PA1); CreateStatuePart(_PA2); CreateStatuePart(_PA3);
   	CreateStatuePart(_PA4); CreateStatuePart(_PA5); CreateStatuePart(_PA6);
   }
-  
-  aPlayers = [[], []];
-  aLorrys = CreateArray(2);
-  aRelaunches = CreateArray(2);
-  aMarkable = CreateArray(2);
-  // Fertig
-  return 1;
-  }
+}
 
 global func CreateStatuePart(id idPart)
   {
