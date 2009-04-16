@@ -1,0 +1,30 @@
+In weniger als 24 Stunden gemacht!
+
+Ein Beispiel, wie das System benutzt wird:
+global func Menutest()
+{
+	var pClonk = FindObject2(Find_Func("IsClonk"));
+	var opt = CreateMenuOptions();
+	SetGeneralMenuOptions(opt,pClonk,0,"MenuCallback",ROCK,"Beispielmenü");
+	AddBoolChoice(opt,"foobar","Regel foobar",ROC_); //Invalide Ids ersetzt das Script
+	AddBoolChoice(opt,GIDL,"Goldstatuen",GIDL);
+	AddBoolChoice(opt,42,"Antwort erkennen");
+	AddRangeChoice(opt,"Steine","Anzahl Steine",ROCK, 0, 100, 10, 50); //Min, Max, Step, Default
+	AddEnumChoice(opt,["barz"],"Schwierigkeitsgrad",CNLK); //Arrays sind keine Probleme
+		AddEnumChoiceItem(opt,["barz"],0,"Leicht",FLNT,0);
+		AddEnumChoiceItem(opt,["barz"],ROCK,"Auch leicht",TFLN,0);
+		AddEnumChoiceItem(opt,["barz"],"normal","Mittel",SFLN,"wieder alles möglich", true);
+		AddEnumChoiceItem(opt,["barz"],[],"Schwer",EFLN,1);
+	SetExtraData(opt,"EASTERN");
+	CreateMenuByOptions(opt);
+}
+
+global func MenuCallback(hash, data)
+{
+Log("ExtraData %v",data);
+var iter = HashIter(hash); // Iterator erzeugen
+var node;
+while(node = HashIterNext(iter)) { // Solange es weitere Elemente gibt
+Log("Key: %v, Val: %v", node[0], node[1]); // Key und Value ausgeben
+}
+}

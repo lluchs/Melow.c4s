@@ -1,0 +1,9 @@
+Activate=%s aktivieren
+Deactivate=%s deaktivieren
+
+Increase=%s um %d erhöhen
+Decrease=%s um %d verringern
+
+Choose=%s für %s auswählen
+
+Finished=Fertig
