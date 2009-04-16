@@ -145,11 +145,13 @@ private func ParseMenu(int iSelection)
     var value=HashGet(hMenu,Key);
     if(value[MS4C_Type_Index]==MS4C_Typ_Bool)
     {
-      var def=CreateDummy(value[MS4C_Id_Index], value[MS4C_Data_Index]);
+      var def=CreateDummy(value[MS4C_Id_Index], value[MS4C_Data_Index], true);
       if(value[MS4C_Data_Index])
-        AddMenuItem(Format("$Deactivate$",value[MS4C_Name_Index]),Format("DeactivateBool(%v,%d)",Key,i++),0,pMenuObject,0,0,0,4,def);
+        AddMenuItem(Format("$Deactivate$",value[MS4C_Name_Index]),Format("DeactivateBool(%v,%d)",Key,i++),
+        	0,pMenuObject,0,0,Format("$Deactivate$",value[MS4C_Name_Index]),4,def);
       else
-        AddMenuItem(Format("$Activate$",value[MS4C_Name_Index]),Format("ActivateBool(%v,%d)",Key,i++),0,pMenuObject,0,0,0,4,def);
+        AddMenuItem(Format("$Activate$",value[MS4C_Name_Index]),Format("ActivateBool(%v,%d)",Key,i++),
+        	0,pMenuObject,0,0,Format("$Activate$",value[MS4C_Name_Index]),4,def);
       RemoveObject(def);
     }
     else if(value[MS4C_Type_Index]==MS4C_Typ_Enum)
@@ -158,18 +160,25 @@ private func ParseMenu(int iSelection)
       {
         var itemvalue=HashGet(value[MS4C_Data_Index][0],itemkey);
         var def=CreateDummy(itemvalue[1], itemkey==value[MS4C_Data_Index][2]);
-        AddMenuItem(Format("$Choose$",itemvalue[0],value[MS4C_Name_Index]),Format("Choose(%v,%v,%d)",Key,itemkey,i++),0,pMenuObject,0,0,0,4,def);
+        AddMenuItem(Format("$Choose$",itemvalue[0],value[MS4C_Name_Index]),
+        	Format("Choose(%v,%v,%d)",Key,itemkey,i++),0,pMenuObject,0,0,
+        	Format("$Choose$",itemvalue[0],value[MS4C_Name_Index]),4,def);
         RemoveObject(def);
       }
     }
     else if(value[MS4C_Type_Index]==MS4C_Typ_Range)
     {
-      AddMenuItem(value[1],Format("ParseMenu(%d)",i++),value[MS4C_Id_Index],pMenuObject,value[3][3]);
-      AddMenuItem(Format("$Increase$",value[MS4C_Name_Index],value[MS4C_Data_Index][2]),Format("Increase(%v,%d)",Key,i++),MS4C,pMenuObject,0,0,0,2,1);
-      AddMenuItem(Format("$Decrease$",value[MS4C_Name_Index],value[MS4C_Data_Index][2]),Format("Decrease(%v,%d)",Key,i++),MS4C,pMenuObject,0,0,0,2,2);
+      AddMenuItem(value[1],Format("ParseMenu(%d)",i++),value[MS4C_Id_Index],
+      	pMenuObject,value[3][3],0,value[1]);
+      AddMenuItem(Format("$Increase$",value[MS4C_Name_Index],value[MS4C_Data_Index][2]),
+      	Format("Increase(%v,%d)",Key,i++),MS4C,pMenuObject,0,0,
+      	Format("$Increase$",value[MS4C_Name_Index],value[MS4C_Data_Index][2]),2,1);
+      AddMenuItem(Format("$Decrease$",value[MS4C_Name_Index],value[MS4C_Data_Index][2]),
+      	Format("Decrease(%v,%d)",Key,i++),MS4C,pMenuObject,0,0,
+      	Format("$Decrease$",value[MS4C_Name_Index],value[MS4C_Data_Index][2]),2,2);
     }
   }
-  AddMenuItem("$Finished$","Finished",MS4C,pMenuObject,0,0,0,2,3);
+  AddMenuItem("$Finished$","Finished",MS4C,pMenuObject,0,0,"$Finished$",2,3);
   SelectMenuItem(iSelection,pMenuObject);
 }
 
@@ -214,7 +223,7 @@ protected func Finished()
 
 public func MenuQueryCancel() { return(1); }
 
-private func CreateDummy(id idItem, bool fChecked)
+private func CreateDummy(id idItem, bool fChecked, bool fOverlayForced)
 {
   var pDummy=CreateObject(MS4C,0,0,-1);
   if(idItem && FindDefinition(idItem))
@@ -224,6 +233,11 @@ private func CreateDummy(id idItem, bool fChecked)
     {
       SetGraphics("Chosen", pDummy, MS4C, 1, GFXOV_MODE_Picture);
       SetObjDrawTransform(650,0,5000,0,650,5000, pDummy, 1);      
+    }
+    else if(fOverlayForced)
+    {
+      SetGraphics("NotChosen", pDummy, MS4C, 1, GFXOV_MODE_Picture);
+      SetObjDrawTransform(650,0,5000,0,650,5000, pDummy, 1);     	
     }
   }
   else

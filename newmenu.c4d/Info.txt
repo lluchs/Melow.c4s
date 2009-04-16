@@ -1,11 +1,11 @@
 In weniger als 24 Stunden gemacht!
 
 Ein Beispiel, wie das System benutzt wird:
-global func Menutest()
+func Menutest()
 {
 	var pClonk = FindObject2(Find_Func("IsClonk"));
 	var opt = CreateMenuOptions();
-	SetGeneralMenuOptions(opt,pClonk,0,"MenuCallback",ROCK,"Beispielmenü");
+	SetGeneralMenuOptions(opt,pClonk,this,"MenuCallback",ROCK,"Beispielmenü");
 	AddBoolChoice(opt,"foobar","Regel foobar",ROC_); //Invalide Ids ersetzt das Script
 	AddBoolChoice(opt,GIDL,"Goldstatuen",GIDL);
 	AddBoolChoice(opt,42,"Antwort erkennen");
@@ -19,7 +19,7 @@ global func Menutest()
 	CreateMenuByOptions(opt);
 }
 
-global func MenuCallback(hash, data)
+func MenuCallback(hash, data)
 {
 Log("ExtraData %v",data);
 var iter = HashIter(hash); // Iterator erzeugen
