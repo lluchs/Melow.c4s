@@ -4,7 +4,15 @@
 
 #appendto TIM1
 
+local fNoMenu;
+
+public func NoMenu() {
+	fNoMenu = true;
+}
+
 protected func Collection2(object pClonk) {
+	if(fNoMenu)
+		return;
 	ShowMenu(pClonk);
 	SetName(Format("%s hat versagt!", GetPlayerName(pClonk -> GetOwner())));
 	Schedule(Format("SetCursor(%d, Object(%d), true, true)", pClonk -> GetOwner(), ObjectNumber(pClonk)), 1);
