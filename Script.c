@@ -70,6 +70,35 @@ public func StartGame() {
   	else
   		CreateObject(ID, iX, iY, NO_OWNER);
   }
+  
+  if(fReflection) {
+		// Landschaft spiegeln
+		Log("Landschaft wird gespiegelt, bitte warten...");
+		var iX = 0, iY = 0, iInc = LandscapeWidth() / 2 / 10, iLog = 1;
+		for(var x=0; x < LandscapeWidth() / 2; x++) {
+		 if(x == (iLog * iInc)) {
+		 	Log("%d%%", iLog * 10);
+		 	iLog++;
+		 }
+		 for(var y=0; y < LandscapeHeight(); y++)
+		 	if(GetMaterial(x+iX, y+iY) && GetTexture(x+iX, y+iY))
+		   DrawMaterialQuad (Format("%s-%s", MaterialName(GetMaterial(x+iX, y+iY)), GetTexture(x+iX, y+iY)), LandscapeWidth()-x-iX, y+iY, LandscapeWidth()-x-iX, y+iY+1, LandscapeWidth()-x-iX+1, y+iY+1, LandscapeWidth()-x-iX+1, y+iY, !GBackSky(x+iX, y+iY));
+		 }
+		// alle Objekte auf der rechten Seite entfernen
+		Log("Objekte werden gespiegelt...");
+		for(var pObj in FindObjects(Find_InRect(LandscapeWidth() / 2, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree"))))
+			pObj -> RemoveObject();
+		// und durch die linken Objekte ersetzen
+		for(var pObj in FindObjects(Find_NoContainer(), Find_InRect(0, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree"))))
+			CreateObject(pObj -> GetID(), LandscapeWidth() - pObj -> GetX(), pObj -> GetY() - GetDefCoreVal("Offset", "DefCore", pObj -> GetID(), 1), pObj -> GetOwner());
+		var pNewObj, pContainer;
+		for(var pObj in FindObjects(Find_AnyContainer(), Find_InRect(0, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree")))) {
+			pNewObj = CreateObject(pObj -> GetID(), LandscapeWidth() - pObj -> GetX(), pObj -> GetY() - GetDefCoreVal("Offset", "DefCore", pObj -> GetID(), 1), pObj -> GetOwner());
+			pContainer = pObj -> Contained();
+			pNewObj -> Enter(FindObject2(Find_ID(pContainer -> GetID()), Find_AtPoint(LandscapeWidth() - pContainer -> GetX(), pContainer -> GetY())));
+		}
+  }
+  
   // Statuenteile erzeugen
   for(var i=0; i<2; i++) {
   	CreateStatuePart(_PA1); CreateStatuePart(_PA2); CreateStatuePart(_PA3);
@@ -172,7 +201,7 @@ global func RndStatContID()
 
 /* Spielerinitialisierung */
 
-static fCorpseRelaunch, iMinLorryDistance, iMarkable;
+static fCorpseRelaunch, fReflection, iMinLorryDistance, iMarkable;
 
 protected func InitializePlayer(int iPlr) {
 	if(fGameStarted)
@@ -186,6 +215,7 @@ protected func InitializePlayer(int iPlr) {
 	var opt = CreateMenuOptions();
 	SetGeneralMenuOptions(opt, GetCrew(iPlr), 0, "ApplySettings", LBRL, "Einstellungen");
 	AddBoolChoice(opt, "fCorpseRelaunch", "Leichenrelaunch", 0, true);
+	AddBoolChoice(opt, "fReflection", "Landschaftsspiegelung", 0, false);
 	AddRangeChoice(opt, "iMinLorryDistance", "Mindestabstand der Loren", LORY, 0, 600, 100, 200); //Min, Max, Step, Default
 	AddRangeChoice(opt, "iMarkable", "Anzahl markierbarer Teile", C4Id(Format("_PA%d", RandomX(1, 6))), 0, 12, 1, 1); //Min, Max, Step, Default
 	CreateMenuByOptions(opt);
@@ -211,7 +241,16 @@ protected func InitializePlayer2(int iPlr) {
 	iTeam--;
 	PushBack(iPlr, aPlayers[iTeam]);
 	if(GetLength(aPlayers[iTeam]) == 1) {
-  	var pLorry = PlaceLorry(iTeam + 1);
+  	var pOtherLorry = OtherLorry(iTeam + 1);
+  	if(fReflection && pOtherLorry) {
+  		if(pOtherLorry -> GetX() < LandscapeWidth() / 2) {
+  			var pLorry = CreateObject(LORY, LandscapeWidth() - pOtherLorry -> GetX(), pOtherLorry -> GetY() - GetDefCoreVal("Offset", "DefCore", LORY, 1), NO_OWNER);
+  		}
+  		else
+  			var pLorry = CreateObject(LORY, Abs(pOtherLorry -> GetX() - LandscapeWidth()), pOtherLorry -> GetY() - GetDefCoreVal("Offset", "DefCore", LORY, 1), NO_OWNER);
+  	}
+  	else
+  		var pLorry = PlaceLorry(iTeam + 1);
   	if(pLorry == -1)
   		return -1;
   	var iX = pLorry -> GetX(), iY = pLorry -> GetY();
@@ -235,6 +274,10 @@ private func PlaceLorry(int iTeam) {
 	if(!iPlaceLorryY)
 		iPlaceLorryY = RandomX(LandscapeHeight() / 5, LandscapeHeight() - (LandscapeHeight() / 3));
 	var iX = LandscapeWidth() / 4, iY = iPlaceLorryY, iWdt = LandscapeWidth() / 2, iHgt = LandscapeHeight() / 4;
+	if(fReflection) {
+		iX = LandscapeWidth() / 6;
+		iWdt = LandscapeWidth() / 2 - LandscapeWidth() / 4;
+	}
 	var iRX, iRY, pLorry;
 	for(var i = 0; i < 50000; i++) {
 		iRX = RandomX(iX, iX + iWdt);
