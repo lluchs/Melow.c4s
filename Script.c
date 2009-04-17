@@ -438,7 +438,7 @@ global func OtherLorry(int iTeam) {
 }
 
 global func FxIntTeamLorryFillTimer(object pTarget, int iEffectNumber, int iEffectTime) {
-	var iTeam = EffectVar(0, pTarget, iEffectNumber), aFillIDs = [[WBRL, 1, 1], [LOAM, 10, 3], [METL, 7], [FLNT, 10, 3], [CBRD, GetLength(aPlayers[iTeam])], [SFLN, 4], [STFN, 4]], aSpecialFill = [[CNKT, 2], [EFLN, 2], [BRED, GetLength(aPlayers[iTeam])]], iMin;
+	var iTeam = EffectVar(0, pTarget, iEffectNumber), aFillIDs = [[WBRL, 1, 1], [LOAM, 10, 3], [METL, 7], [FLNT, 10, 3], [CBRD, GetLength(aPlayers[iTeam - 1])], [SFLN, 4], [STFN, 4]], aSpecialFill = [[CNKT, 2], [EFLN, 2], [BRED, GetLength(aPlayers[iTeam - 1])]], iMin;
 	if(OtherLorry(iTeam) && ((OtherLorry(iTeam) -> GetY()) < (pTarget -> GetY())) && ((pTarget -> GetY()) - (OtherLorry(iTeam) -> GetY()) > 100)) {
 		iMin = RandomX(1, 7);
 		for(var aID in aSpecialFill) {
