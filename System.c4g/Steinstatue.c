@@ -6,7 +6,7 @@
 
 protected func Initialize() {
 	if(GetID() == IDOL) {
-		if(!FrameCounter())
+		if(!fGameStarted)
 			AddEffect("Extinguish", this, 100, 20, this, GetID());
 		else
 			AddEffect("Reload", this, 100, 2, this, GetID());
