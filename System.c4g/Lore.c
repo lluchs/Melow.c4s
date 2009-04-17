@@ -15,6 +15,10 @@ public func SetTeam(int iNew) {
 	return iTeam = iNew;
 }
 
+public func IsTeamLorry() {
+	return iTeam;
+}
+
 // Steuerung
 
 protected func ControlDig(object pClonk) {
