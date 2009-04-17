@@ -25,6 +25,46 @@ public func StartGame() {
 		pObj -> RemoveObject();
 	aLorrys = CreateArray(2);
 	
+	if(fReflection){
+		var aPos=SearchLorryPosition();
+		if(GetType(aPos)!=C4V_Array){
+			StartGame();
+			return;
+		}
+		for(var i=0; i<5000; i++){
+			if(Distance(aPos[0], aPos[1], LandscapeWidth() - aPos[0], aPos[1]) > iMinLorryDistance){ //We have a Winner!
+				PlaceLorry(aPos, 1);
+				PlaceLorry([LandscapeWidth() - aPos[0], aPos[1]], 2);
+				break;
+			}
+			aPos=SearchLorryPosition();
+		}
+	} else {
+		var aPositions=CreateArray(), aCurrPos;
+		var fWin;
+		for(var i=0; i<1500; i++){
+			aCurrPos=SearchLorryPosition();
+			if(GetType(aCurrPos)!=C4V_Array){
+				StartGame();
+				return;
+			}
+			PushBack(aCurrPos,aPositions);
+			for(var j=GetLength(aPositions)-2; j>=0; j--){
+				if(Distance(aPositions[j][0],aPositions[j][1], aCurrPos[0], aCurrPos[1]) > iMinLorryDistance){ //We have a Winner!
+					PlaceLorry(aPositions[j], 1);
+					PlaceLorry(aCurrPos, 2);
+					fWin=true;
+					break;
+				}
+			}
+			if(fWin) break;
+		}
+		if(!fWin){
+			StartGame();
+			return;
+		}
+	}
+	
 	for(var i = 0; i < GetPlayerCount(); i++) {
 		if(InitializePlayer2(GetPlayerByIndex(i)) == -1)
 			return;
@@ -216,7 +256,7 @@ protected func InitializePlayer(int iPlr) {
 	SetGeneralMenuOptions(opt, GetCrew(iPlr), 0, "ApplySettings", LBRL, "Einstellungen", MS4C_Verbose_GlobalMessage | MS4C_Verbose_Log);
 	AddBoolChoice(opt, "fCorpseRelaunch", "Leichenrelaunch", 0, true);
 	AddBoolChoice(opt, "fReflection", "Landschaftsspiegelung", 0, false);
-	AddRangeChoice(opt, "iMinLorryDistance", "Mindestabstand der Loren", LORY, 0, 600, 100, 200); //Min, Max, Step, Default
+	AddRangeChoice(opt, "iMinLorryDistance", "Mindestabstand der Loren", LORY, 0, 700, 100, 200); //Min, Max, Step, Default
 	AddRangeChoice(opt, "iMarkable", "Anzahl markierbarer Teile", C4Id(Format("_PA%d", RandomX(1, 6))), 0, 12, 1, 1); //Min, Max, Step, Default
 	CreateMenuByOptions(opt);
 }
@@ -240,26 +280,7 @@ protected func InitializePlayer2(int iPlr) {
 	var iTeam = GetPlayerTeam(iPlr);
 	iTeam--;
 	PushBack(iPlr, aPlayers[iTeam]);
-	if(GetLength(aPlayers[iTeam]) == 1) {
-  	var pOtherLorry = OtherLorry(iTeam + 1);
-  	if(fReflection && pOtherLorry) {
-  		if(pOtherLorry -> GetX() < LandscapeWidth() / 2) {
-  			var pLorry = CreateObject(LORY, LandscapeWidth() - pOtherLorry -> GetX(), pOtherLorry -> GetY() - GetDefCoreVal("Offset", "DefCore", LORY, 1), NO_OWNER);
-  		}
-  		else
-  			var pLorry = CreateObject(LORY, Abs(pOtherLorry -> GetX() - LandscapeWidth()), pOtherLorry -> GetY() - GetDefCoreVal("Offset", "DefCore", LORY, 1), NO_OWNER);
-  		pLorry -> SetTeam(iTeam + 1);
-  	}
-  	else
-  		var pLorry = PlaceLorry(iTeam + 1);
-  	if(pLorry == -1)
-  		return -1;
-  	var iX = pLorry -> GetX(), iY = pLorry -> GetY();
-  	CreateObject(WIPF, iX, iY, NO_OWNER) -> SetClrModulation(GetTeamColor(iTeam + 1));
-  	ScheduleGameCall("StuckCheck", 30, 0, GetCrew(iPlr));
-	}
-	else
-		var pLorry = aLorrys[iTeam];
+	var pLorry = aLorrys[iTeam];
 	GetCrew(iPlr) -> SetPosition(pLorry -> GetX(), pLorry -> GetY());
 	if(!GetEffect("BanBurnPotion", GetCrew(iPlr)))
 		AddEffect("BanBurnPotion", GetCrew(iPlr), 210, 1, 0, PFIR, PFIR -> EffectDuration());
@@ -270,8 +291,20 @@ public func StuckCheck(object pClonk) {
   		pClonk -> CreateContents(TFLN);
 }
 
+private func PlaceLorry(array aPosition, int iTeam) {
+	var pLorry = CreateObject(LORY, aPosition[0], aPosition[1], NO_OWNER);
+	pLorry -> SetTeam(iTeam);
+	aLorrys[iTeam - 1] = pLorry;
+  	// Objektversorgung
+  	AddEffect("IntTeamLorryFill", pLorry, 100, 5000, 0, 0, iTeam);
+  	if(pLorry -> Stuck())
+  		ShakeFree(pLorry -> GetX(), pLorry -> GetY(), GetDefWidth(pLorry -> GetID()));
+  	if(pLorry -> Stuck())
+  		CreateObject(ROCK, pLorry -> GetX(), pLorry -> GetY(), NO_OWNER) -> Explode(GetDefWidth(pLorry -> GetID()));
+}
+
 static iPlaceLorryY;
-private func PlaceLorry(int iTeam) {
+private func SearchLorryPosition(){
 	if(!iPlaceLorryY)
 		iPlaceLorryY = RandomX(LandscapeHeight() / 5, LandscapeHeight() - (LandscapeHeight() / 3));
 	var iX = LandscapeWidth() / 4, iY = iPlaceLorryY, iWdt = LandscapeWidth() / 2, iHgt = LandscapeHeight() / 4;
@@ -279,35 +312,18 @@ private func PlaceLorry(int iTeam) {
 		iX = LandscapeWidth() / 6;
 		iWdt = LandscapeWidth() / 2 - LandscapeWidth() / 4;
 	}
-	var iRX, iRY, pLorry;
+	var iRX, iRY;
 	for(var i = 0; i < 50000; i++) {
 		iRX = RandomX(iX, iX + iWdt);
 		iRY = RandomX(iY, iY + iHgt);
 		if(GetMaterial(iRX, iRY) != Material("Tunnel"))
 			continue;
-		while(GetMaterial(iRX, iRY) == Material("Tunnel")) {
+		while(GetMaterial(iRX, iRY) == Material("Tunnel")) 
 			iRY += 2;
-		}
 		iRY -= 5;
-		if(OtherLorry(iTeam) && Distance(iRX, iRY, OtherLorry(iTeam) -> GetX(), OtherLorry(iTeam) -> GetY()) < iMinLorryDistance)
-			continue;
-		pLorry = CreateObject(LORY, iRX, iRY, NO_OWNER);
-		pLorry -> SetTeam(iTeam);
-  	aLorrys[iTeam - 1] = pLorry;
-  	// Objektversorgung
-  	AddEffect("IntTeamLorryFill", pLorry, 100, 5000, 0, 0, iTeam);
-  	if(pLorry -> Stuck())
-  		ShakeFree(pLorry -> GetX(), pLorry -> GetY(), GetDefWidth(pLorry -> GetID()));
-  	if(pLorry -> Stuck())
-  		CreateObject(ROCK, pLorry -> GetX(), pLorry -> GetY(), NO_OWNER) -> Explode(GetDefWidth(pLorry -> GetID()));
-  	break;
+		return([iRX, iRY]);
 	}
-	if(!pLorry) {
-		Log("ERROR: Keine passende Lorenfunktion gefunden (und das nach 50000 versuchen :/)");
-		StartGame();
-		return -1;
-	}
-	return pLorry;
+	return 0;
 }
 
 protected func RemovePlayer(int iPlr, int iTeam) {
