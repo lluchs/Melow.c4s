@@ -14,6 +14,11 @@ local szCaption;       //Caption für CreateMenu
 local hMenu;           //Hash in dem die Werte gespeichert werden
 local aSequence;       //Array, um Reihenfolge zu erhalten, macht den Hash irgendwie etwas sinnlos.
 local ExtraData;       //ExtraData, wird auch dem Callback übergeben, sinnvoll, um viele Optionsmenüs auf ein mal zu erstellen
+local iVerbose;
+
+static const MS4C_Verbose_ObjectMessage = 1;
+static const MS4C_Verbose_GlobalMessage = 2;
+static const MS4C_Verbose_Log  = 4;
 
 //Array indices
 static const MS4C_MenuObject_Index    = 0;
@@ -24,6 +29,7 @@ static const MS4C_Caption_Index       = 4;
 static const MS4C_Menu_Index          = 5;
 static const MS4C_Sequence_Index      = 6;
 static const MS4C_ExtraData_Index     = 7;
+static const MS4C_Verbose_Index     = 8;
 
 static const MS4C_Type_Index          = 0;
 static const MS4C_Name_Index          = 1;
@@ -40,13 +46,14 @@ global func CreateMenuOptions()
 }
 
 //Setzt allgemeine Optionen für ein Optionsarray, Parameter s. oben
-global func SetGeneralMenuOptions(&options, object MenuObject, object CommandObject, string Callback, id Symbol, string Caption)
+global func SetGeneralMenuOptions(&options, object MenuObject, object CommandObject, string Callback, id Symbol, string Caption, int Verbose)
 {
   options[MS4C_MenuObject_Index]=MenuObject;
   options[MS4C_CommandObject_Index]=CommandObject;
   options[MS4C_Callback_Index]=Callback;
   options[MS4C_Symbol_Index]=Symbol;
-  options[MS4C_Caption_Index]=Caption;  
+  options[MS4C_Caption_Index]=Caption;
+  options[MS4C_Verbose_Index]=Verbose;  
 }
 
 //Setzt die ExtraData
@@ -115,6 +122,7 @@ public func Init(array options)
   hMenu           = options[MS4C_Menu_Index];
   aSequence       = options[MS4C_Sequence_Index];
   ExtraData       = options[MS4C_ExtraData_Index];
+  iVerbose        = options[MS4C_Verbose_Index];
   ParseMenu();
 }
 
@@ -134,6 +142,40 @@ public func GetValues()
     DebugLog("Unknown value typ");
   }
   return hValues;
+}
+
+public func CreateMessage()
+{
+	var szTotalMsg=szCaption;
+	var fFirst=true;
+  for (var Key in aSequence)
+  {
+    var value=HashGet(hMenu,Key);
+    var szMsg=0;
+    if(value[MS4C_Type_Index]==MS4C_Typ_Bool)
+    {
+    	if(value[MS4C_Data_Index])
+    		szMsg=Format(value[MS4C_Name_Index]);
+    	else
+    	 	continue;
+    }
+    else if(value[MS4C_Type_Index]==MS4C_Typ_Enum)
+    {
+    	szMsg=Format("%s: %s",value[MS4C_Name_Index],HashGet(value[MS4C_Data_Index][0],value[MS4C_Data_Index][2])[0]);
+    }
+    else if(value[MS4C_Type_Index]==MS4C_Typ_Range)
+    {
+    	szMsg=Format("%s: %d",value[MS4C_Name_Index],value[MS4C_Data_Index][3]);
+    }
+    if (fFirst) //Hier hinten, damit nicht angewählte bools nicht alles kapput machen!
+    {
+			szTotalMsg=Format("%s: %s", szTotalMsg, szMsg);
+			fFirst=false;
+		}
+		else
+    	szTotalMsg=Format("%s, %s", szTotalMsg, szMsg);
+  }
+  return szTotalMsg;
 }
 
 private func ParseMenu(int iSelection)
@@ -216,6 +258,13 @@ protected func Decrease(Key, int iSelection)
 
 protected func Finished()
 {
+	var szMsg=CreateMessage();
+	if (iVerbose&MS4C_Verbose_ObjectMessage)
+		Message(szMsg, pMenuObject);
+	if (iVerbose&MS4C_Verbose_GlobalMessage)
+		Message(szMsg);
+	if (iVerbose&MS4C_Verbose_Log)
+		Log(szMsg);
   if (pCommandObject) pCommandObject->Call(szCallback,GetValues(),ExtraData);
   else GameCall(szCallback,GetValues(),ExtraData);
   RemoveObject();
