@@ -12,7 +12,8 @@ protected func Initialize() {
 }
 
 protected func Death() {
-	AddEffect("IntRelauncher", this, 100, 50, this, GetID(this));
+	if(fCorpseRelaunch)
+		AddEffect("IntRelauncher", this, 100, 50, this, GetID(this));
 	return _inherited(...);
 }
 

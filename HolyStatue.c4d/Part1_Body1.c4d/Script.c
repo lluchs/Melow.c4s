@@ -55,7 +55,7 @@ protected func ControlDigDouble(object pClonk) {
 	var iTeam = GetPlayerTeam(pClonk -> GetOwner());
 	if(!RejoinClonk(iTeam, pClonk -> GetOwner())) {
 		var iCount = ObjectCount2(Find_Func("IsHolyStatuePart"), Find_Func("IsMarkedFor", iTeam));
-		if(!iCount || ((iCount - 1) < (GetLength(GetPlayerByTeam(OtherTeam(iTeam))) - GetLength(GetPlayerByTeam(iTeam)) + aMarkable[iTeam - 1]))) {
+		if((iCount - iMarkable) < (GetLength(GetPlayerByTeam(OtherTeam(iTeam))) - GetLength(GetPlayerByTeam(iTeam)) + aMarkable[iTeam - 1])) {
 			iOwnerTeam = iTeam;
 			szRelauncher = GetPlayerName(pClonk -> GetOwner());
 			SetClrModulation(GetTeamColor(iTeam));

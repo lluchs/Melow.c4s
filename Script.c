@@ -10,14 +10,54 @@ protected func Initialize()
   SetGamma(0, RGB(160,110,90), RGB(255,255,255));
   
   aPlayers = [[], []];
-  aLorrys = CreateArray(2);
   aRelaunches = CreateArray(2);
   aMarkable = CreateArray(2);
   // Fertig
   return 1;
   }
   
-public func Initialize2() {
+static fGameStarted;
+  
+public func StartGame() {
+	DrawDefMap(0, 0, LandscapeWidth(), LandscapeHeight(), "CaveParcour");
+	
+	for(var pObj in FindObjects(Find_Or(Find_ID(LORY), Find_ID(WIPF))))
+		pObj -> RemoveObject();
+	aLorrys = CreateArray(2);
+	
+	for(var i = 0; i < GetPlayerCount(); i++) {
+		if(InitializePlayer2(GetPlayerByIndex(i)) == -1)
+			return;
+	}
+	
+	// Vegetation
+	for(var i = 0; i < 5; i++) {
+		if(Random(2))
+			PlaceVegetation(BONE, 0, 0, LandscapeWidth(), LandscapeHeight(), 100000);
+		if(Random(2))
+			PlaceVegetation(SKUL, 0, 0, LandscapeWidth(), LandscapeHeight(), 100000);
+		if(Random(2))
+			PlaceVegetation(TRE2, 0, 0, LandscapeWidth(), LandscapeHeight(), 100000);
+	}
+	
+	// Objekte in der Erde
+	PlaceObjects(FLNT, 5 * RandomX(5, 10), "Earth");
+	PlaceObjects(LOAM, 20 * RandomX(2, 4), "Earth");
+	PlaceObjects(EFLN, 1 * RandomX(1, 10), "Earth");
+	PlaceObjects(METL, 2 * RandomX(6, 10), "Earth");
+	PlaceObjects(ZAPN, 3 * RandomX(1, 3), "Earth");
+	PlaceObjects(FMEG, 3 * RandomX(1, 3), "Earth");
+	PlaceObjects(MEGG, 3 * RandomX(1, 3), "Earth");
+	PlaceObjects(CNKT, 5 * RandomX(2, 4), "Earth");
+	PlaceObjects(TFLN, 5 * RandomX(4, 8), "Earth");
+	PlaceObjects(STFN, 2 * RandomX(4, 8), "Earth");
+	PlaceObjects(GUNP, 2 * RandomX(5, 8), "Earth");
+	PlaceObjects(CNCR, 5 * RandomX(4, 8), "Earth");
+	PlaceObjects(LIQG, 5 * RandomX(4, 8), "Earth");
+	
+	// Tiere
+	PlaceAnimal(BIRD);
+	
   // Fahrzeuge in die Höhle
   var cnt=Random(5); while (++cnt<13) PlaceVehicle();
   var iX, iY, ID;
@@ -35,6 +75,7 @@ public func Initialize2() {
   	CreateStatuePart(_PA1); CreateStatuePart(_PA2); CreateStatuePart(_PA3);
   	CreateStatuePart(_PA4); CreateStatuePart(_PA5); CreateStatuePart(_PA6);
   }
+  fGameStarted = true;
 }
 
 global func CreateStatuePart(id idPart)
@@ -131,15 +172,48 @@ global func RndStatContID()
 
 /* Spielerinitialisierung */
 
-static aPlayers, aLorrys, aRelaunches, aMarkable;
+static fCorpseRelaunch, iMinLorryDistance, iMarkable;
+
 protected func InitializePlayer(int iPlr) {
+	if(fGameStarted)
+		return InitializePlayer2(iPlr);
+	var pDummy = CreateObject(TIM1, 10, 10, iPlr);
+	pDummy -> NoMenu();
+	GetCrew(iPlr) -> Enter(pDummy);
+	AddEffect("Anti", GetCrew(iPlr), 300, 10);
+	if(iPlr)
+		return;
+	var opt = CreateMenuOptions();
+	SetGeneralMenuOptions(opt, GetCrew(iPlr), 0, "ApplySettings", LBRL, "Einstellungen");
+	AddBoolChoice(opt, "fCorpseRelaunch", "Leichenrelaunch", 0, true);
+	AddRangeChoice(opt, "iMinLorryDistance", "Mindestabstand der Loren", LORY, 0, 600, 100, 200); //Min, Max, Step, Default
+	AddRangeChoice(opt, "iMarkable", "Anzahl markierbarer Teile", C4Id(Format("_PA%d", RandomX(1, 6))), 0, 12, 1, 1); //Min, Max, Step, Default
+	CreateMenuByOptions(opt);
+}
+
+public func ApplySettings(hash, data) {
+	var iter = HashIter(hash); // Iterator erzeugen
+	var node;
+	while(node = HashIterNext(iter)) { // Solange es weitere Elemente gibt
+		GlobalN(node[0]) = node[1];
+	}
+	StartGame();
+}
+
+static aPlayers, aLorrys, aRelaunches, aMarkable;
+protected func InitializePlayer2(int iPlr) {
+	var pObj = GetCrew(iPlr) -> Contained();
+	if(pObj) {
+		GetCrew(iPlr) -> Exit();
+		pObj -> RemoveObject();
+	}
 	var iTeam = GetPlayerTeam(iPlr);
 	iTeam--;
 	PushBack(iPlr, aPlayers[iTeam]);
 	if(GetLength(aPlayers[iTeam]) == 1) {
   	var pLorry = PlaceLorry(iTeam + 1);
-  	if(!pLorry)
-  		return;
+  	if(pLorry == -1)
+  		return -1;
   	var iX = pLorry -> GetX(), iY = pLorry -> GetY();
   	CreateObject(WIPF, iX, iY, NO_OWNER) -> SetClrModulation(GetTeamColor(iTeam + 1));
   	ScheduleGameCall("StuckCheck", 30, 0, GetCrew(iPlr));
@@ -147,7 +221,8 @@ protected func InitializePlayer(int iPlr) {
 	else
 		var pLorry = aLorrys[iTeam];
 	GetCrew(iPlr) -> SetPosition(pLorry -> GetX(), pLorry -> GetY());
-	AddEffect("BanBurnPotion", GetCrew(iPlr), 210, 1, 0, PFIR, PFIR -> EffectDuration());
+	if(!GetEffect("BanBurnPotion", GetCrew(iPlr)))
+		AddEffect("BanBurnPotion", GetCrew(iPlr), 210, 1, 0, PFIR, PFIR -> EffectDuration());
 }
 
 public func StuckCheck(object pClonk) {
@@ -170,7 +245,7 @@ private func PlaceLorry(int iTeam) {
 			iRY += 2;
 		}
 		iRY -= 5;
-		if(OtherLorry(iTeam) && Distance(iRX, iRY, OtherLorry(iTeam) -> GetX(), OtherLorry(iTeam) -> GetY()) < 200)
+		if(OtherLorry(iTeam) && Distance(iRX, iRY, OtherLorry(iTeam) -> GetX(), OtherLorry(iTeam) -> GetY()) < iMinLorryDistance)
 			continue;
 		pLorry = CreateObject(LORY, iRX, iRY, NO_OWNER);
 		pLorry -> SetTeam(iTeam);
@@ -185,7 +260,8 @@ private func PlaceLorry(int iTeam) {
 	}
 	if(!pLorry) {
 		Log("ERROR: Keine passende Lorenfunktion gefunden (und das nach 50000 versuchen :/)");
-		GameOver(); // besser neue Karte erstellen - sollte aber eigentlich eh nicht soweit kommen
+		StartGame();
+		return -1;
 	}
 	return pLorry;
 }
