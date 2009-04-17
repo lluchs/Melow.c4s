@@ -213,7 +213,7 @@ protected func InitializePlayer(int iPlr) {
 	if(iPlr)
 		return;
 	var opt = CreateMenuOptions();
-	SetGeneralMenuOptions(opt, GetCrew(iPlr), 0, "ApplySettings", LBRL, "Einstellungen");
+	SetGeneralMenuOptions(opt, GetCrew(iPlr), 0, "ApplySettings", LBRL, "Einstellungen", MS4C_Verbose_GlobalMessage | MS4C_Verbose_Log);
 	AddBoolChoice(opt, "fCorpseRelaunch", "Leichenrelaunch", 0, true);
 	AddBoolChoice(opt, "fReflection", "Landschaftsspiegelung", 0, false);
 	AddRangeChoice(opt, "iMinLorryDistance", "Mindestabstand der Loren", LORY, 0, 600, 100, 200); //Min, Max, Step, Default
