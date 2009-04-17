@@ -86,10 +86,10 @@ public func StartGame() {
 		 }
 		// alle Objekte auf der rechten Seite entfernen
 		Log("Objekte werden gespiegelt...");
-		for(var pObj in FindObjects(Find_InRect(LandscapeWidth() / 2, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree"))))
+		for(var pObj in FindObjects(Find_InRect(LandscapeWidth() / 2, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree")), Find_Not(Find_OCF(OCF_CrewMember)), Find_Not(Find_Func("IsTeamLorry"))))
 			pObj -> RemoveObject();
 		// und durch die linken Objekte ersetzen
-		for(var pObj in FindObjects(Find_NoContainer(), Find_InRect(0, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree"))))
+		for(var pObj in FindObjects(Find_NoContainer(), Find_InRect(0, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree")), Find_Not(Find_OCF(OCF_CrewMember)), Find_Not(Find_Func("IsTeamLorry"))))
 			CreateObject(pObj -> GetID(), LandscapeWidth() - pObj -> GetX(), pObj -> GetY() - GetDefCoreVal("Offset", "DefCore", pObj -> GetID(), 1), pObj -> GetOwner());
 		var pNewObj, pContainer;
 		for(var pObj in FindObjects(Find_AnyContainer(), Find_InRect(0, 0, LandscapeWidth() / 2, LandscapeHeight()), Find_Or(Find_Category(C4D_Structure), Find_Category(C4D_Vehicle), Find_Category(C4D_Living), Find_Category(C4D_Object), Find_Func("IsTree")))) {
@@ -248,6 +248,7 @@ protected func InitializePlayer2(int iPlr) {
   		}
   		else
   			var pLorry = CreateObject(LORY, Abs(pOtherLorry -> GetX() - LandscapeWidth()), pOtherLorry -> GetY() - GetDefCoreVal("Offset", "DefCore", LORY, 1), NO_OWNER);
+  		pLorry -> SetTeam(iTeam + 1);
   	}
   	else
   		var pLorry = PlaceLorry(iTeam + 1);
