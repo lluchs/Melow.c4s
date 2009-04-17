@@ -96,3 +96,5 @@ map CaveParcour {
   // floor
   //overlay { y=99; wdt=55; hgt=2; mat=Granite; tex=Rough; };
   };
+
+map empty {};
