@@ -15,6 +15,8 @@ public func CreateLinekit(id ID) {
 	if(ID == DPIP)
 		iX = Abs(iX);
 	var pLinekit = CreateObject(LNKT, iX, GetDefHeight(GetID()) / 2, GetOwner());
+	if(ID == DPIP)
+		pLinekit -> SetClrModulation(RGB(128, 128, 128));
 	CreateLine(ID, pLinekit);
 	return 1;
 }
