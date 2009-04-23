@@ -15,7 +15,7 @@ protected func Transfer()
   // Zielobjekt hat nicht genug Energie (könnte man auch in AcceptTransfer verlegen...)
   if (!EnergyCheck(1000,pPumpTarget)) return(0);
   // Materialtransfer
-  for (var i = 0; i < 200; i++)
+  for (var i = 0; i < iPumpSpeed; i++)
   {
     var mat = ObjectExtractLiquid(GetActionTarget(1));
     if (mat == -1) mat = ExtractLiquid(GetVertex(50, 0), GetVertex(50, 1));

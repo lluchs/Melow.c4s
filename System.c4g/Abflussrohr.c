@@ -18,7 +18,7 @@ private func Transfer() // Abflussrohr führt zur Zeit keine Prüfung von AcceptTr
   if (pPumpTarget)
   {
     // Materialtransfer
-    for (i = 0; i < 200; i++)  
+    for (i = 0; i < iPumpSpeed; i++)  
       if(!ObjectInsertMaterial(ObjectExtractLiquid(pPumpSource), pPumpTarget))
       	break;
   }
@@ -26,7 +26,7 @@ private func Transfer() // Abflussrohr führt zur Zeit keine Prüfung von AcceptTr
   else
   {
     // Materialtransfer
-    for (i = 0; i < 200; i++)    
+    for (i = 0; i < iPumpSpeed; i++)    
       if(!InsertMaterial(ObjectExtractLiquid(pPumpSource), GetVertex(50,0), GetVertex(50,1)))
       	break;
   }
