@@ -241,7 +241,7 @@ global func RndStatContID()
 
 /* Spielerinitialisierung */
 
-static fCorpseRelaunch, fReflection, iMinLorryDistance, iMarkable;
+static fPump, fCorpseRelaunch, fReflection, iMinLorryDistance, iMarkable;
 
 protected func InitializePlayer(int iPlr) {
 	if(fGameStarted)
@@ -254,6 +254,7 @@ protected func InitializePlayer(int iPlr) {
 		return;
 	var opt = CreateMenuOptions();
 	SetGeneralMenuOptions(opt, GetCrew(iPlr), 0, "ApplySettings", LBRL, "Einstellungen", MS4C_Verbose_GlobalMessage | MS4C_Verbose_Log);
+	AddBoolChoice(opt, "fPump", "Pumpe baubar", PUMP, false);
 	AddBoolChoice(opt, "fCorpseRelaunch", "Leichenrelaunch", 0, true);
 	AddBoolChoice(opt, "fReflection", "Landschaftsspiegelung", 0, false);
 	AddRangeChoice(opt, "iMinLorryDistance", "Mindestabstand der Loren", LORY, 0, 700, 100, 200); //Min, Max, Step, Default
@@ -272,6 +273,8 @@ public func ApplySettings(hash, data) {
 
 static aPlayers, aLorrys, aRelaunches, aMarkable;
 protected func InitializePlayer2(int iPlr) {
+	if(fPump) // Pumpe-baubar-Option
+		SetPlrKnowledge(iPlr, PUMP);
 	var pObj = GetCrew(iPlr) -> Contained();
 	if(pObj) {
 		GetCrew(iPlr) -> Exit();
