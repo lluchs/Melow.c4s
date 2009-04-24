@@ -33,15 +33,23 @@ public func RejoinClonk(int iTeam, int iPlr, object pClonk) {
 	// Effekte und so
 	Sound("Magic1");
 	CastParticles("MSpark", 5, 50, 0,0, 100, 200, RGBa(255,100,100,128), RGBa(255,0,0,0));
-	if(iPlr != -1)
+	if(iPlr != -1) {
 		var szName = GetPlayerName(iPlr);
-	else
+		Relaunches(iPlr)++;
+	}
+	else {
 		var szName = szRelauncher;
+		iPlr = GetPlayerByName(szName);
+		Relaunches(iPlr)++;
+	}
 	if(!iTeam)
 		iTeam = iOwnerTeam;
 	Log("<c %x>Spieler %s relauncht %s!</c>", GetTeamColor(iTeam), szName, GetPlayerName(pClonk -> GetOwner()));
 	CreateStatuePart(GetID());
 	RemoveObject();
+	UpdatePlayerScoreboard(pClonk -> GetOwner());
+	UpdatePlayerScoreboard(iPlr);
+	UpdateTeamScoreboard(iTeam);
 	return 1;
 }
 
@@ -59,6 +67,7 @@ protected func ControlDigDouble(object pClonk) {
 			iOwnerTeam = iTeam;
 			szRelauncher = GetPlayerName(pClonk -> GetOwner());
 			SetClrModulation(GetTeamColor(iTeam));
+			UpdateTeamScoreboard(GetPlayerTeam(pClonk -> GetOwner()));
 			return 1;
 		}
 	}
