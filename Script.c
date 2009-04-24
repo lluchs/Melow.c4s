@@ -255,7 +255,7 @@ protected func InitializePlayer(int iPlr) {
 	var opt = CreateMenuOptions();
 	SetGeneralMenuOptions(opt, GetCrew(iPlr), 0, "ApplySettings", LBRL, "Einstellungen", MS4C_Verbose_GlobalMessage | MS4C_Verbose_Log);
 	AddBoolChoice(opt, "fPump", "Pumpe baubar", PUMP, false);
-	AddRangeChoice(opt, "iPumpSpeed", "Pumpgeschwindigkeit", PUMP, 10, 200, 10, 100); //Min, Max, Step, Default
+	AddRangeChoice(opt, "iPumpSpeed", "Pumpgeschwindigkeit", PUMP, 10, 200, 10, 50); //Min, Max, Step, Default
 	AddBoolChoice(opt, "fCorpseRelaunch", "Leichenrelaunch", 0, true);
 	AddBoolChoice(opt, "fReflection", "Landschaftsspiegelung", 0, false);
 	AddRangeChoice(opt, "iMinLorryDistance", "Mindestabstand der Loren", LORY, 0, 700, 100, 200); //Min, Max, Step, Default
