@@ -491,7 +491,7 @@ global func UpdateTeamScoreboard(int iTeam) {
 	szMarked = Format("%s</c>", szMarked);
 	
 	// Markierte Statuenteile
-	SetScoreboardData(iTeam - 1, 0, szMarked);
+	SetScoreboardData(iTeam - 1, 0, szMarked, iTeam * 2);
 	
 	// Relaunches
 	SetScoreboardData(iTeam - 1, 1, Format("%d", iRelaunches), iRelaunches + 1);
