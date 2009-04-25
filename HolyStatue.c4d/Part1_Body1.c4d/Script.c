@@ -40,7 +40,7 @@ public func RejoinClonk(int iTeam, int iPlr, object pClonk) {
 	else {
 		var szName = szRelauncher;
 		iPlr = GetPlayerByName(szName);
-		Relaunches(iPlr)++;
+		IncRelaunches(iPlr);
 	}
 	if(!iTeam)
 		iTeam = iOwnerTeam;

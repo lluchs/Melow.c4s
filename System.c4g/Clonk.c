@@ -38,7 +38,7 @@ protected func FxIntRelauncherTimer(object pTarget, int iEffectNumber) {
 	// Effekte und so
 	Sound("Magic1");
 	CastParticles("MSpark", 5, 50, 0,0, 100, 200, RGBa(255,100,100,128), RGBa(255,0,0,0));
-	Relaunches(pRelauncher -> GetOwner())++;
+	IncRelaunches(pRelauncher -> GetOwner());
 	var szName = GetPlayerName(pRelauncher -> GetOwner()), iTeam = GetPlayerTeam(pClonk -> GetOwner());
 	Log("<c %x>Spieler %s relauncht %s!</c>", GetTeamColor(iTeam), szName, GetPlayerName(pClonk -> GetOwner()));
 	RemoveObject();

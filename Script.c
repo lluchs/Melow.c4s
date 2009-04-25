@@ -279,8 +279,21 @@ public func ApplySettings(hash, data) {
 	StartGame();
 }
 
-global func & Relaunches(int iPlr) { return aRelaunches[GetPlayerID(iPlr)]; }
-global func & Deaths(int iPlr) { return aDeaths[GetPlayerID(iPlr)]; }
+global func & Relaunches(int iPlr) { return aRelaunches[GetPlayerID(iPlr) + 2]; }
+global func & Deaths(int iPlr) { return aDeaths[GetPlayerID(iPlr) + 2]; }
+global func & TeamRelaunches(int iTeam) { return aRelaunches[iTeam - 1]; }
+global func & TeamDeaths(int iTeam) { return aRelaunches[iTeam -1]; }
+
+global func IncRelaunches(int iPlr) {
+	Relaunches(iPlr)++;
+	TeamRelaunches(GetPlayerTeam(iPlr))++;
+	return 1;
+}
+global func IncDeaths(int iPlr) {
+	Deaths(iPlr)++;
+	TeamDeaths(GetPlayerTeam(iPlr))++;
+	return 1;
+}
 
 static aPlayers, aLorrys, aRelaunches, aDeaths, aMarkable;
 protected func InitializePlayer2(int iPlr) {
@@ -381,7 +394,7 @@ static fGameOver;
 protected func OnClonkDeath(object pClonk) {
 	if(!GetPlayerName(pClonk -> GetOwner()))
 		return;
-	Deaths(pClonk -> GetOwner())++;
+	IncDeaths(pClonk -> GetOwner());
 	var pStatuePart = FindObject2(Find_Func("IsHolyStatuePart"), Find_Func("IsMarkedFor", GetPlayerTeam(pClonk -> GetOwner())), Sort_Random());
 	if(pStatuePart || !EliminationCheck(GetPlayerTeam(pClonk -> GetOwner()))) {
 		var pNewClonk = CreateObject(CLNK, 0, 0, pClonk -> GetOwner());
@@ -479,11 +492,8 @@ global func UpdatePlayerScoreboard(int iPlr) {
 }
 
 global func UpdateTeamScoreboard(int iTeam) {
-	var iRelaunches = 0, iDeaths = 0;
-	for(var iPlr in GetPlayerByTeam(iTeam)) {
-		iRelaunches += Relaunches(iPlr);
-		iDeaths += Deaths(iPlr);
-	}
+	var iRelaunches = TeamRelaunches(iTeam), iDeaths = TeamDeaths(iTeam);
+	
 	var szMarked = Format("<c %x>", GetTeamColor(iTeam));
 	for(var pPart in FindObjects(Find_Func("IsHolyStatuePart"), Find_Func("IsMarkedFor", iTeam))) {
 		szMarked = Format("%s{{%i}} ", szMarked, pPart -> GetID());
