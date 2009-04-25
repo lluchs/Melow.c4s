@@ -421,6 +421,7 @@ private func EliminationCheck(int iTeam, int iLastPlr) {
 	if(!ObjectCount2(Find_OCF(OCF_CrewMember), Find_Team(iTeam), Find_Func("StillAlive"))) {
 		UpdatePlayerScoreboard(iLastPlr);
 		UpdateTeamScoreboard(GetPlayerTeam(iLastPlr));
+		DoEvaluation();
 		EliminateTeam(iTeam);
 		fGameOver = 1;
 		return 1;
@@ -513,6 +514,24 @@ global func UpdateTeamScoreboard(int iTeam) {
 	SetScoreboardData(iTeam - 1, 2, Format("<i>%d</i>", iDeaths), -1);
 	
 	return 1;
+}
+
+/* Evaluation */
+
+public func DoEvaluation() {
+	var i = 1;
+	for(var iRelaunches in aRelaunches) {
+		if(iRelaunches)
+			AddEvaluationData(Format("{{_PA%d}}Relaunches: %d", iRelaunches), i);
+		i++;
+	}
+	
+	i = 1;
+	for(var iDeaths in aDeaths) {
+		if(iDeaths)
+			AddEvaluationData(Format("{{SKUL}}Tode: %d", iDeaths), i);
+		i++;
+	}
 }
 
 /* Automatisches Füllen der Anfangslore */
