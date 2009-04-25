@@ -494,10 +494,10 @@ global func UpdateTeamScoreboard(int iTeam) {
 	SetScoreboardData(iTeam - 1, 0, szMarked, iTeam * 2);
 	
 	// Relaunches
-	SetScoreboardData(iTeam - 1, 1, Format("%d", iRelaunches), iRelaunches + 1);
+	SetScoreboardData(iTeam - 1, 1, Format("<i>%d</i>", iRelaunches), iRelaunches + 1);
 	
 	// Tode
-	SetScoreboardData(iTeam - 1, 2, Format("%d", iDeaths), -1);
+	SetScoreboardData(iTeam - 1, 2, Format("<i>%d</i>", iDeaths), -1);
 	
 	return 1;
 }
