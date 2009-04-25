@@ -358,6 +358,9 @@ protected func RemovePlayer(int iPlr, int iTeam) {
 	// Spiel vorbei? -> egal
 	if(fGameOver)
 		return;
+	// im Scoreboard markieren
+	SetScoreboardData(GetPlayerID(iPlr) + 2, 0, "{{DOOR}}", iTeam * 2 + 1);
+	
 	var pClonk = GetCrew(iPlr);
 	// Clonk wartete auf Relaunch? -> nichts tun
 	if(!pClonk -> StillAlive(iTeam))

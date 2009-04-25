@@ -2,7 +2,7 @@
 
 #strict 2
 
-local iOwnerTeam, szRelauncher;
+local iOwnerTeam, szRelauncher, iRelauncher;
 
 protected func Hit()
 {
@@ -35,12 +35,16 @@ public func RejoinClonk(int iTeam, int iPlr, object pClonk) {
 	CastParticles("MSpark", 5, 50, 0,0, 100, 200, RGBa(255,100,100,128), RGBa(255,0,0,0));
 	if(iPlr != -1) {
 		var szName = GetPlayerName(iPlr);
-		Relaunches(iPlr)++;
+		IncRelaunches(iPlr);
+		UpdatePlayerScoreboard(iPlr);
 	}
 	else {
 		var szName = szRelauncher;
-		iPlr = GetPlayerByName(szName);
-		IncRelaunches(iPlr);
+		// Relaunchvariablen und Scoreboard anpassen - der Spieler könnte schön das Spiel verlassen haben
+		TeamRelaunches(iOwnerTeam);
+		aRelaunches[iRelauncher + 2]++;
+		SetScoreboardData(iRelauncher + 2, 1, Format("%d", aRelaunches[iRelauncher + 2]), aRelaunches[iRelauncher + 2]);
+		// neu sortiert wird unten
 	}
 	if(!iTeam)
 		iTeam = iOwnerTeam;
@@ -48,7 +52,6 @@ public func RejoinClonk(int iTeam, int iPlr, object pClonk) {
 	CreateStatuePart(GetID());
 	RemoveObject();
 	UpdatePlayerScoreboard(pClonk -> GetOwner());
-	UpdatePlayerScoreboard(iPlr);
 	UpdateTeamScoreboard(iTeam);
 	return 1;
 }
@@ -66,6 +69,7 @@ protected func ControlDigDouble(object pClonk) {
 		if((iCount - iMarkable) < (GetLength(GetPlayerByTeam(OtherTeam(iTeam))) - GetLength(GetPlayerByTeam(iTeam)) + aMarkable[iTeam - 1])) {
 			iOwnerTeam = iTeam;
 			szRelauncher = GetPlayerName(pClonk -> GetOwner());
+			iRelauncher = GetPlayerID(pClonk -> GetOwner());
 			SetClrModulation(GetTeamColor(iTeam));
 			UpdateTeamScoreboard(GetPlayerTeam(pClonk -> GetOwner()));
 			return 1;
