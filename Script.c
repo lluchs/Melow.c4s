@@ -471,8 +471,8 @@ global func UpdatePlayerScoreboard(int iPlr) {
 	SetScoreboardData(iPlr + 2, 2, Format("%d", Deaths(iPlr)), Deaths(iPlr));
 	
 	// Neu Sortieren
-	//SortScoreboard(2); // Tode (je weniger, desto höher)
-	//SortScoreboard(1, true); // Relaunches
+	SortScoreboard(2); // Tode (je weniger, desto höher)
+	SortScoreboard(1, true); // Relaunches
 	SortScoreboard(0); // Team (zuerst Team 1, dann 2)
 	
 	return 1;
