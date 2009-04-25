@@ -279,8 +279,8 @@ public func ApplySettings(hash, data) {
 	StartGame();
 }
 
-global func & Relaunches(int iPlr) { return aRelaunches[iPlr]; }
-global func & Deaths(int iPlr) { return aDeaths[iPlr]; }
+global func & Relaunches(int iPlr) { return aRelaunches[GetPlayerID(iPlr)]; }
+global func & Deaths(int iPlr) { return aDeaths[GetPlayerID(iPlr)]; }
 
 static aPlayers, aLorrys, aRelaunches, aDeaths, aMarkable;
 protected func InitializePlayer2(int iPlr) {
@@ -454,21 +454,21 @@ global func UpdatePlayerScoreboard(int iPlr) {
 		return;
 	
 	// Spielername
-	SetScoreboardData(iPlr + 2, SBRD_Caption, Format("<c %x>%s</c>", GetTeamColor(iTeam), GetPlayerName(iPlr)));
+	SetScoreboardData(GetPlayerID(iPlr) + 2, SBRD_Caption, Format("<c %x>%s</c>", GetTeamColor(iTeam), GetPlayerName(iPlr)));
 	
 	// Status
 	if(pClonk -> Waits4Relaunch()) // wartet auf Relaunch?
-		SetScoreboardData(iPlr + 2, 0, "{{SKUL}}", iTeam * 2 + 1);
+		SetScoreboardData(GetPlayerID(iPlr) + 2, 0, "{{SKUL}}", iTeam * 2 + 1);
 	else if(pClonk -> OnFire()) // brennt?
-		SetScoreboardData(iPlr + 2, 0, "{{FLAM}}", iTeam * 2 + 1);
+		SetScoreboardData(GetPlayerID(iPlr) + 2, 0, "{{FLAM}}", iTeam * 2 + 1);
 	else // alles OK :(
-		SetScoreboardData(iPlr + 2, 0, "{{CLNK}}", iTeam * 2 + 1);
+		SetScoreboardData(GetPlayerID(iPlr) + 2, 0, "{{CLNK}}", iTeam * 2 + 1);
 	
 	// Relaunches
-	SetScoreboardData(iPlr + 2, 1, Format("%d", Relaunches(iPlr)), Relaunches(iPlr));
+	SetScoreboardData(GetPlayerID(iPlr) + 2, 1, Format("%d", Relaunches(iPlr)), Relaunches(iPlr));
 	
 	// Tode
-	SetScoreboardData(iPlr + 2, 2, Format("%d", Deaths(iPlr)), Deaths(iPlr));
+	SetScoreboardData(GetPlayerID(iPlr) + 2, 2, Format("%d", Deaths(iPlr)), Deaths(iPlr));
 	
 	// Neu Sortieren
 	SortScoreboard(2); // Tode (je weniger, desto höher)
