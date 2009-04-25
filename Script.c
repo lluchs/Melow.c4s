@@ -64,8 +64,8 @@ public func StartGame() {
 		}
 	}
 	
-	aRelaunches = CreateArray(GetPlayerCount());
-	aDeaths = CreateArray(GetPlayerCount());
+	aRelaunches = CreateArray(GetPlayerCount() + 2);
+	aDeaths = CreateArray(GetPlayerCount() + 2);
 	
 	InitScoreboard();
 	
