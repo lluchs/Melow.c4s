@@ -399,7 +399,7 @@ protected func OnClonkDeath(object pClonk) {
 		return;
 	IncDeaths(pClonk -> GetOwner());
 	var pStatuePart = FindObject2(Find_Func("IsHolyStatuePart"), Find_Func("IsMarkedFor", GetPlayerTeam(pClonk -> GetOwner())), Sort_Random());
-	if(pStatuePart || !EliminationCheck(GetPlayerTeam(pClonk -> GetOwner()))) {
+	if(pStatuePart || !EliminationCheck(GetPlayerTeam(pClonk -> GetOwner()), pClonk -> GetOwner())) {
 		var pNewClonk = CreateObject(CLNK, 0, 0, pClonk -> GetOwner());
 		pNewClonk -> GrabObjectInfo(pClonk);
 		pNewClonk -> DoEnergy(100);
@@ -417,8 +417,10 @@ protected func OnClonkDeath(object pClonk) {
 	UpdateTeamScoreboard(GetPlayerTeam(pClonk -> GetOwner()));
 }
 
-private func EliminationCheck(int iTeam) {
+private func EliminationCheck(int iTeam, int iLastPlr) {
 	if(!ObjectCount2(Find_OCF(OCF_CrewMember), Find_Team(iTeam), Find_Func("StillAlive"))) {
+		UpdatePlayerScoreboard(iLastPlr);
+		UpdateTeamScoreboard(GetPlayerTeam(iLastPlr));
 		EliminateTeam(iTeam);
 		fGameOver = 1;
 		return 1;
@@ -466,14 +468,12 @@ public func InitScoreboard() {
 
 global func UpdatePlayerScoreboard(int iPlr) {
 	var iTeam = GetPlayerTeam(iPlr), pClonk = GetCrew(iPlr);
-	if(!pClonk)
-		return;
 	
 	// Spielername
 	SetScoreboardData(GetPlayerID(iPlr) + 2, SBRD_Caption, Format("<c %x>%s</c>", GetTeamColor(iTeam), GetPlayerName(iPlr)));
 	
 	// Status
-	if(pClonk -> Waits4Relaunch()) // wartet auf Relaunch?
+	if(!pClonk || pClonk -> Waits4Relaunch()) // wartet auf Relaunch/ist tot?
 		SetScoreboardData(GetPlayerID(iPlr) + 2, 0, "{{SKUL}}", iTeam * 2 + 1);
 	else if(pClonk -> OnFire()) // brennt?
 		SetScoreboardData(GetPlayerID(iPlr) + 2, 0, "{{FLAM}}", iTeam * 2 + 1);
