@@ -8,7 +8,32 @@ local iOwnerTeam;
 
 protected func Initialize() {
 	iOwnerTeam = GetPlayerTeam(GetOwner());
+	AddEffect("IntDamageCount", this, 100, 0, this, GetID());
 	return _inherited(...);
+}
+
+protected func FxIntDamageCountDamage(object pTarget, int iEffectNumber, int iDmgEngy, int iCause, int iBy) {
+	if(Contained() && Contained() -> GetID() == TIM1)
+		return iDmgEngy;
+	var iPlr = GetOwner();
+	if(iDmgEngy > 0) { // Heilung?
+		HealVal(iPlr) += iDmgEngy;
+		return iDmgEngy;
+	}
+	
+	if(iBy != -1 && GetPlayerName(iBy)) {
+		var iTeam = GetPlayerTeam(iPlr), iOtherTeam = GetPlayerTeam(iBy);
+		if(iTeam == iOtherTeam) {
+			TeamDamageVal(iBy) += iDmgEngy;
+		}
+	
+		else if(iTeam != iOtherTeam) {
+			TeamDamageVal(iBy) += iDmgEngy;
+		}
+		return iDmgEngy;
+	}
+	
+	return iDmgEngy;
 }
 
 protected func Death() {

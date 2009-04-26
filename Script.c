@@ -4,6 +4,13 @@
 
 /* Initialisierung */
 
+static aHeal, aDamage, aTeamDamage;
+static const DMGC_Nick = 0, DMGC_Val = 1;
+
+global func & HealVal(int iPlr) { return aHeal[GetPlayerID(iPlr)][DMGC_Val]; }
+global func & DamageVal(int iPlr) { return aDamage[GetPlayerID(iPlr)][DMGC_Val]; }
+global func & TeamDamageVal(int iPlr) { return aTeamDamage[GetPlayerID(iPlr)][DMGC_Val]; }
+
 protected func Initialize()
   {
   // Leuchten von all der Lava
@@ -11,6 +18,7 @@ protected func Initialize()
   
   aPlayers = [[], []];
   aMarkable = CreateArray(2);
+  aHeal = aDamage = aTeamDamage = CreateArray();
   // Fertig
   return 1;
   }
@@ -251,6 +259,7 @@ global func RndStatContID()
 static fPump, iPumpSpeed, fCorpseRelaunch, fReflection, iMinLorryDistance, iMarkable;
 
 protected func InitializePlayer(int iPlr) {
+	aHeal[GetPlayerID(iPlr)] = aDamage[GetPlayerID(iPlr)] = aTeamDamage[GetPlayerID(iPlr)] = [GetTaggedPlayerName(iPlr), 0];
 	if(fGameStarted)
 		return InitializePlayer2(iPlr);
 	var pDummy = CreateObject(TIM1, 10, 10, iPlr);
@@ -422,8 +431,8 @@ private func EliminationCheck(int iTeam, int iLastPlr) {
 		UpdatePlayerScoreboard(iLastPlr);
 		UpdateTeamScoreboard(GetPlayerTeam(iLastPlr));
 		DoEvaluation();
-		EliminateTeam(iTeam);
 		fGameOver = 1;
+		EliminateTeam(iTeam);
 		return 1;
 	}
 }
@@ -532,6 +541,43 @@ public func DoEvaluation() {
 			AddEvaluationData(Format("{{SKUL}}Tode: %d", iDeaths), i);
 		i++;
 	}
+	
+	i = 0;
+	var szNick;
+	for(var a in aHeal) {
+		if(GetType(a) != C4V_Array)
+			continue;
+		if(a[DMGC_Val] > i) {
+			i = a[DMGC_Val];
+			szNick = a[DMGC_Nick];
+		}
+	}
+	if(i > 0 && szNick)
+		AddEvaluationData(Format("%s hat sich am meisten geheilt!", szNick));
+	
+	i = 0;
+	for(var a in aDamage) {
+		if(GetType(a) != C4V_Array)
+			continue;
+		if(a[DMGC_Val] > i) {
+			i = a[DMGC_Val];
+			szNick = a[DMGC_Nick];
+		}
+	}
+	if(i > 0 && szNick)
+		AddEvaluationData(Format("%s hat den Gegnern am meisten Schaden gemacht!", szNick));
+	
+	i = 0;
+	for(var a in aTeamDamage) {
+		if(GetType(a) != C4V_Array)
+			continue;
+		if(a[DMGC_Val] > i) {
+			i = a[DMGC_Val];
+			szNick = a[DMGC_Nick];
+		}
+	}
+	if(i > 0 && szNick)
+		AddEvaluationData(Format("%s hat seinem Team am meisten Schaden eingebracht!", szNick));
 }
 
 /* Automatisches Füllen der Anfangslore */
