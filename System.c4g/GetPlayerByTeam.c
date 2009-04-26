@@ -7,8 +7,6 @@ global func GetPlayerByTeam(int iTeam) {
 	for(var i = 0; i < GetPlayerCount(); i++)
 		if(GetPlayerTeam(GetPlayerByIndex(i)) == iTeam)
 			aPlayers[GetLength(aPlayers)] = GetPlayerByIndex(i);
-	if(!GetLength(aPlayers))
-		return;
 	return aPlayers;
 }
 /*

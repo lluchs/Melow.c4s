@@ -10,7 +10,6 @@ protected func Initialize()
   SetGamma(0, RGB(160,110,90), RGB(255,255,255));
   
   aPlayers = [[], []];
-  aRelaunches = CreateArray(2);
   aMarkable = CreateArray(2);
   // Fertig
   return 1;
@@ -65,10 +64,18 @@ public func StartGame() {
 		}
 	}
 	
+	aRelaunches = CreateArray(GetPlayerCount() + 2);
+	aDeaths = CreateArray(GetPlayerCount() + 2);
+	
+	InitScoreboard();
+	
 	for(var i = 0; i < GetPlayerCount(); i++) {
 		if(InitializePlayer2(GetPlayerByIndex(i)) == -1)
 			return;
 	}
+	
+	UpdateTeamScoreboard(1);
+	UpdateTeamScoreboard(2);
 	
 	// Vegetation
 	for(var i = 0; i < 5; i++) {
@@ -272,7 +279,23 @@ public func ApplySettings(hash, data) {
 	StartGame();
 }
 
-static aPlayers, aLorrys, aRelaunches, aMarkable;
+global func & Relaunches(int iPlr) { return aRelaunches[GetPlayerID(iPlr) + 2]; }
+global func & Deaths(int iPlr) { return aDeaths[GetPlayerID(iPlr) + 2]; }
+global func & TeamRelaunches(int iTeam) { return aRelaunches[iTeam - 1]; }
+global func & TeamDeaths(int iTeam) { return aRelaunches[iTeam -1]; }
+
+global func IncRelaunches(int iPlr) {
+	Relaunches(iPlr)++;
+	TeamRelaunches(GetPlayerTeam(iPlr))++;
+	return 1;
+}
+global func IncDeaths(int iPlr) {
+	Deaths(iPlr)++;
+	TeamDeaths(GetPlayerTeam(iPlr))++;
+	return 1;
+}
+
+static aPlayers, aLorrys, aRelaunches, aDeaths, aMarkable;
 protected func InitializePlayer2(int iPlr) {
 	if(fPump) // Pumpe-baubar-Option
 		SetPlrKnowledge(iPlr, PUMP);
@@ -288,6 +311,7 @@ protected func InitializePlayer2(int iPlr) {
 	GetCrew(iPlr) -> SetPosition(pLorry -> GetX(), pLorry -> GetY());
 	if(!GetEffect("BanBurnPotion", GetCrew(iPlr)))
 		AddEffect("BanBurnPotion", GetCrew(iPlr), 210, 1, 0, PFIR, PFIR -> EffectDuration());
+	UpdatePlayerScoreboard(iPlr);
 }
 
 public func StuckCheck(object pClonk) {
@@ -334,6 +358,9 @@ protected func RemovePlayer(int iPlr, int iTeam) {
 	// Spiel vorbei? -> egal
 	if(fGameOver)
 		return;
+	// im Scoreboard markieren
+	SetScoreboardData(GetPlayerID(iPlr) + 2, 0, "{{DOOR}}", iTeam * 2 + 1);
+	
 	var pClonk = GetCrew(iPlr);
 	// Clonk wartete auf Relaunch? -> nichts tun
 	if(!pClonk -> StillAlive(iTeam))
@@ -370,24 +397,30 @@ static fGameOver;
 protected func OnClonkDeath(object pClonk) {
 	if(!GetPlayerName(pClonk -> GetOwner()))
 		return;
+	IncDeaths(pClonk -> GetOwner());
 	var pStatuePart = FindObject2(Find_Func("IsHolyStatuePart"), Find_Func("IsMarkedFor", GetPlayerTeam(pClonk -> GetOwner())), Sort_Random());
-	if(!pStatuePart && EliminationCheck(GetPlayerTeam(pClonk -> GetOwner())))
-		return;
-	var pNewClonk = CreateObject(CLNK, 0, 0, pClonk -> GetOwner());
-	pNewClonk -> GrabObjectInfo(pClonk);
-	pNewClonk -> DoEnergy(100);
-	if(pStatuePart) {
-		pStatuePart -> RejoinClonk(0, -1, pNewClonk);
-		return 1;
+	if(pStatuePart || !EliminationCheck(GetPlayerTeam(pClonk -> GetOwner()), pClonk -> GetOwner())) {
+		var pNewClonk = CreateObject(CLNK, 0, 0, pClonk -> GetOwner());
+		pNewClonk -> GrabObjectInfo(pClonk);
+		pNewClonk -> DoEnergy(100);
+		if(pStatuePart) {
+			pStatuePart -> RejoinClonk(0, -1, pNewClonk);
+		}
+		else {
+			AddEffect("Anti", pNewClonk, 300, 10);
+			pNewClonk -> Enter(CreateObject(TIM1, pClonk -> GetX(), pClonk -> GetY(), NO_OWNER));
+			Log("<c %x>Spieler %s wartet auf einen Relaunch (Statuenteil anfassen + Doppelgraben)!</c>", GetTeamColor(GetPlayerTeam(pClonk -> GetOwner())), GetPlayerName(pClonk -> GetOwner()));
+			SetCursor(pClonk -> GetOwner(), pClonk, 1, 1);
+		}
 	}
-	AddEffect("Anti", pNewClonk, 300, 10);
-	pNewClonk -> Enter(CreateObject(TIM1, pClonk -> GetX(), pClonk -> GetY(), NO_OWNER));
-	Log("<c %x>Spieler %s wartet auf einen Relaunch (Statuenteil anfassen + Doppelgraben)!</c>", GetTeamColor(GetPlayerTeam(pClonk -> GetOwner())), GetPlayerName(pClonk -> GetOwner()));
-	SetCursor(pClonk -> GetOwner(), pClonk, 1, 1);
+	UpdatePlayerScoreboard(pClonk -> GetOwner());
+	UpdateTeamScoreboard(GetPlayerTeam(pClonk -> GetOwner()));
 }
 
-private func EliminationCheck(int iTeam) {
+private func EliminationCheck(int iTeam, int iLastPlr) {
 	if(!ObjectCount2(Find_OCF(OCF_CrewMember), Find_Team(iTeam), Find_Func("StillAlive"))) {
+		UpdatePlayerScoreboard(iLastPlr);
+		UpdateTeamScoreboard(GetPlayerTeam(iLastPlr));
 		EliminateTeam(iTeam);
 		fGameOver = 1;
 		return 1;
@@ -421,7 +454,66 @@ global func EliminateTeam(int iTeam) {
 		EliminatePlayer(iPlr);
 }
 
+public func InitScoreboard() {
+	SetScoreboardData(SBRD_Caption, SBRD_Caption, "Scoreboard");
+	SetScoreboardData(SBRD_Caption, 0, "{{CLNK}}"); // Spalte 0: Status
+	SetScoreboardData(SBRD_Caption, 1, Format("{{_PA%d}}", RandomX(5, 6))); // Spalte 1: Relaunches
+	SetScoreboardData(SBRD_Caption, 2, "{{SKUL}}"); // Spalte 2: Tode
+	
+	SetScoreboardData(0, SBRD_Caption, Format("<c %x>{{LORY}}</c>", GetTeamColor(1))); // Team Rot (1)
+	SetScoreboardData(0, 0, " ", 2);
+	SetScoreboardData(1, SBRD_Caption, Format("<c %x>{{LORY}}</c>", GetTeamColor(2))); // Team Grün (2)
+	SetScoreboardData(1, 0, " ", 4);
+}
 
+global func UpdatePlayerScoreboard(int iPlr) {
+	var iTeam = GetPlayerTeam(iPlr), pClonk = GetCrew(iPlr);
+	
+	// Spielername
+	SetScoreboardData(GetPlayerID(iPlr) + 2, SBRD_Caption, Format("<c %x>%s</c>", GetTeamColor(iTeam), GetPlayerName(iPlr)));
+	
+	// Status
+	if(!pClonk || pClonk -> Waits4Relaunch()) // wartet auf Relaunch/ist tot?
+		SetScoreboardData(GetPlayerID(iPlr) + 2, 0, "{{SKUL}}", iTeam * 2 + 1);
+	else if(pClonk -> OnFire()) // brennt?
+		SetScoreboardData(GetPlayerID(iPlr) + 2, 0, "{{FLAM}}", iTeam * 2 + 1);
+	else // alles OK :(
+		SetScoreboardData(GetPlayerID(iPlr) + 2, 0, "{{CLNK}}", iTeam * 2 + 1);
+	
+	// Relaunches
+	SetScoreboardData(GetPlayerID(iPlr) + 2, 1, Format("%d", Relaunches(iPlr)), Relaunches(iPlr));
+	
+	// Tode
+	SetScoreboardData(GetPlayerID(iPlr) + 2, 2, Format("%d", Deaths(iPlr)), Deaths(iPlr));
+	
+	// Neu Sortieren
+	SortScoreboard(2); // Tode (je weniger, desto höher)
+	SortScoreboard(1, true); // Relaunches
+	SortScoreboard(0); // Team (zuerst Team 1, dann 2)
+	
+	return 1;
+}
+
+global func UpdateTeamScoreboard(int iTeam) {
+	var iRelaunches = TeamRelaunches(iTeam), iDeaths = TeamDeaths(iTeam);
+	
+	var szMarked = Format("<c %x>", GetTeamColor(iTeam));
+	for(var pPart in FindObjects(Find_Func("IsHolyStatuePart"), Find_Func("IsMarkedFor", iTeam))) {
+		szMarked = Format("%s{{%i}} ", szMarked, pPart -> GetID());
+	}
+	szMarked = Format("%s</c>", szMarked);
+	
+	// Markierte Statuenteile
+	SetScoreboardData(iTeam - 1, 0, szMarked, iTeam * 2);
+	
+	// Relaunches
+	SetScoreboardData(iTeam - 1, 1, Format("<i>%d</i>", iRelaunches), iRelaunches + 1);
+	
+	// Tode
+	SetScoreboardData(iTeam - 1, 2, Format("<i>%d</i>", iDeaths), -1);
+	
+	return 1;
+}
 
 /* Automatisches Füllen der Anfangslore */
 
