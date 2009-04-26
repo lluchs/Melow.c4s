@@ -282,7 +282,7 @@ public func ApplySettings(hash, data) {
 global func & Relaunches(int iPlr) { return aRelaunches[GetPlayerID(iPlr) + 2]; }
 global func & Deaths(int iPlr) { return aDeaths[GetPlayerID(iPlr) + 2]; }
 global func & TeamRelaunches(int iTeam) { return aRelaunches[iTeam - 1]; }
-global func & TeamDeaths(int iTeam) { return aRelaunches[iTeam -1]; }
+global func & TeamDeaths(int iTeam) { return aDeaths[iTeam -1]; }
 
 global func IncRelaunches(int iPlr) {
 	Relaunches(iPlr)++;
